@@ -70,7 +70,8 @@ jobs:
           languages: javascript
 
       - name: Build project
-        run: npm install && npm run build
+        run: ./build.ps1 Build -Configuration Debug
+        # run: npm install && npm run build
 
       - name: Perform CodeQL Analysis
         if: success()
