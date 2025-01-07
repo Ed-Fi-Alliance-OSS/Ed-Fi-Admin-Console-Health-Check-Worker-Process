@@ -1,4 +1,4 @@
-# Ed-Fi-Admin-Console-Shared-SDK Notices
+# Ed-Fi-Admin-Console-Health-Check-Worker-Process Notices
 
 This product includes software developed at the [Ed-Fi
 Alliance](https://www.ed-fi.org).

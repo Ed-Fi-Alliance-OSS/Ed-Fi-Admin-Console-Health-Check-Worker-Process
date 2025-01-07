@@ -16,16 +16,6 @@
           (clean, restore, inject version information).
         * UnitTest: executes NUnit tests in projects named `*.UnitTests`, which
           do not connect to a database.
-        * E2ETest: executes NUnit tests in projects named `*.E2ETests`, which
-          runs the API in an isolated Docker environment and executes API Calls .
-        * IntegrationTest: executes NUnit test in projects named `*.IntegrationTests`,
-          which connect to a database.
-        * BuildAndPublish: build and publish with `dotnet publish`
-        * Package: builds pre-release and release NuGet packages for the Dms API application.
-        * Push: uploads a NuGet package to the NuGet feed.
-        * DockerBuild: builds a Docker image from source code
-        * DockerRun: runs the Docker image that was built from source code
-        * Run: starts the application
     .EXAMPLE
         .\build-dms.ps1 build -Configuration Release -Version "2.0" -BuildCounter 45
 
@@ -36,15 +26,12 @@
         .\build-dms.ps1 unittest
 
         Output: test results displayed in the console and saved to XML files.
-
-    .EXAMPLE
-        .\build-dms.ps1 push -NuGetApiKey $env:nuget_key
 #>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification = 'False positive')]
 param(
     # Command to execute, defaults to "Build".
     [string]
-    [ValidateSet("Clean", "Build", "BuildAndPublish", "UnitTest", "E2ETest", "IntegrationTest", "Coverage", "Package", "Push", "DockerBuild", "DockerRun", "Run")]
+    [ValidateSet("Clean", "Build", "UnitTest")]
     $Command = "Build",
 
     # Assembly and package version number for the Data Management Service. The
@@ -58,31 +45,13 @@ param(
     [ValidateSet("Debug", "Release")]
     $Configuration = "Debug",
 
-    [bool]
-    $DryRun = $false,
-
     # Ed-Fi's official NuGet package feed for package download and distribution.
     [string]
     $EdFiNuGetFeed = "https://pkgs.dev.azure.com/ed-fi-alliance/Ed-Fi-Alliance-OSS/_packaging/EdFi/nuget/v3/index.json",
 
-    # API key for accessing the feed above. Only required with with the Push
-    # command.
-    [string]
-    $NuGetApiKey,
-
-    # Full path of a package file to push to the NuGet feed. Optional, only
-    # applies with the Push command. If not set, then the script looks for a
-    # NuGet package corresponding to the provided $DMSVersion and $BuildCounter.
-    [string]
-    $PackageFile,
-
     # Only required with local builds and testing.
     [switch]
     $IsLocalBuild,
-
-    # Only required with E2E testing.
-    [switch]
-    $EnableOpenSearch
 )
 
 $solutionRoot = "$PSScriptRoot/Application"
@@ -182,10 +151,6 @@ function Invoke-TestExecution {
         UnitTests { Invoke-Step { UnitTests } }
         Default { "Unknow Test Type" }
     }
-}
-
-function Invoke-Coverage {
-    reportgenerator -reports:"$coverageOutputFile" -targetdir:"$targetDir" -reporttypes:Html
 }
 
 Invoke-Main {
