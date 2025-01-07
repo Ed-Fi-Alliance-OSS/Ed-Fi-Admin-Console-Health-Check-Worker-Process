@@ -1,5 +1,7 @@
 # Ed-Fi-Admin-Console-Worker-Process
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Ed-Fi-Alliance-OSS/Ed-Fi-Admin-Console-Health-Check-Worker-Process/badge)](https://securityscorecards.dev/viewer/?uri=github.com/Ed-Fi-Alliance-OSS/Ed-Fi-Admin-Console-Health-Check-Worker-Process)
+
 This repository contains a collection of microservices designed to provide different standalone functionalities that can be used in Admin Console. Each microservice is developed independently, with its own configurations and specific documentation.
 
 ## Table of Contents
