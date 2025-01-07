@@ -51,7 +51,7 @@ param(
 
     # Only required with local builds and testing.
     [switch]
-    $IsLocalBuild,
+    $IsLocalBuild
 )
 
 $solutionRoot = "$PSScriptRoot/Application"
