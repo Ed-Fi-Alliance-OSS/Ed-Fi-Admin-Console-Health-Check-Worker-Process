@@ -31,7 +31,7 @@
 param(
     # Command to execute, defaults to "Build".
     [string]
-    [ValidateSet("Clean", "Build", "UnitTest")]
+    [ValidateSet("Clean", "Build", "UnitTest","PackageHealthWorker")]
     $Command = "Build",
 
     # Assembly and package version number for the Data Management Service. The
@@ -64,6 +64,34 @@ $maintainers = "Ed-Fi Alliance, LLC and contributors"
 
 Import-Module -Name "$PSScriptRoot/eng/build-helpers.psm1" -Force
 
+function RunNuGetPack {
+    param (
+        [string]
+        $ProjectPath,
+
+        [string]
+        $PackageVersion,
+
+        [string]
+        $nuspecPath
+    )
+
+    # NU5100 is the warning about DLLs outside of a "lib" folder. We're
+    # deliberately using that pattern, therefore we don't care about the
+    # warning.
+    # NU5110 is the warning about ps1 files outside the "tools" folder
+    # NU5111 is a warning about an unrecognized ps1 filename
+    dotnet pack $ProjectPath --output $PSScriptRoot -p:NuspecFile=$nuspecPath -p:NuspecProperties="version=$PackageVersion" /p:NoWarn='"NU5100;NU5110;NU5111"'
+}
+
+function PackageHealthWorker {
+    $project = "EdFi.AdminConsole.HealthCheckService"
+    $mainPath = "$solutionRoot/$project"
+    $projectPath = "$mainPath/$project.csproj"
+    $nugetSpecPath = "$mainPath/publish/$project.nuspec"
+
+    RunNuGetPack -ProjectPath $projectPath -PackageVersion $APIVersion $nugetSpecPath
+}
 function DotNetClean {
     Invoke-Execute { dotnet clean $defaultSolution -c $Configuration --nologo -v minimal }
 }
