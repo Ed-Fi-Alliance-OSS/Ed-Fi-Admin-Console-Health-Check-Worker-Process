@@ -16,7 +16,6 @@ env:
   MANIFEST_FILE: "_manifest/spdx_2.2/manifest.spdx.json"
   PACKAGE_NAME: "AdminConsoleHealthCheckWorker"
   IMAGE_NAME: ${{ vars.IMAGE_NAME }}
-  DATABASE_IMAGE_NAME: ${{ vars.DATABASE_IMAGE_NAME }}
   DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
   REF: ${{ github.ref_name }}
@@ -32,7 +31,7 @@ jobs:
         shell: pwsh
     outputs:
       hash-code: ${{ steps.hash-code.outputs.hash-code }}
-      admin-api-version: ${{ steps.versions.outputs.admin-api }}
+      health-worker-version: ${{ steps.versions.outputs.health-worker }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -42,26 +41,26 @@ jobs:
       - name: Set Version Numbers
         id: versions
         run: |
-          $apiPrefix = "v"
+          $workerPrefix = "v"
 
           # Install the MinVer CLI tool
           &dotnet tool install --global minver-cli
 
-          $apiVersion = $(minver -t $apiPrefix)
+          $healthWorkerVersion = $(minver -t $workerPrefix)
 
           # Full release name
-          "admin-api=$apiVersion" >> $env:GITHUB_OUTPUT
+          "health-worker=$healthWorkerVersion" >> $env:GITHUB_OUTPUT
 
           # SemVer
-          "admin-api-semver=$($apiVersion -Replace $apiPrefix)" >> $env:GITHUB_OUTPUT
+          "health-worker-semver=$($healthWorkerVersion -Replace $apiPrefix)" >> $env:GITHUB_OUTPUT
 
       - name: Publish .NET Assemblies
         run: |
-          $apiVersion = "${{ steps.versions.outputs.admin-api-semver }}"
+          $healthWorkerVersion = "${{ steps.versions.outputs.health-worker-semver }}"
 
           ./build.ps1 -Command BuildAndPublish `
               -Configuration Release `
-              -APIVersion $apiVersion
+              -HealthWorkerVersion $healthWorkerVersion
 
       - name: Setup Nuget.exe
         uses: nuget/setup-nuget@a21f25cd3998bf370fde17e3f1b4c12c175172f9 #v2.0.0
@@ -69,12 +68,12 @@ jobs:
       - name: Create NuGet Packages
         if: success()
         run: |
-          $apiVersion = "${{ steps.versions.outputs.admin-api-semver }}"
+          $healthWorkerVersion = "${{ steps.versions.outputs.health-worker-semver }}"
 
           "Building ${{ env.PACKAGE_NAME }} NuGet Package" | Write-Output
           # Admin API
           ./build.ps1 -Command PackageApi `
-              -APIVersion  $apiVersion `
+              -HealthWorkerVersion  $healthWorkerVersion `
               -Configuration Release
 
       - name: Generate hash for NuGet package
@@ -112,7 +111,7 @@ jobs:
         shell: pwsh
         run: |
           $packageName = "${{ env.PACKAGE_NAME }}"
-          $version = "${{ needs.pack.outputs.admin-api-version }}"
+          $version = "${{ needs.pack.outputs.health-worker-version }}"
 
           Get-ChildItem -Include "EdFi.Suite3.ODS.$packageName.*.nupkg" -Recurse | ForEach-Object { $_.FullName } > buildfilelist.txt
 
@@ -193,21 +192,6 @@ jobs:
               -Headers $gh_headers `
               -InFile $uploadName
 
-  # provenance-create:
-  #   name: Create Provenance
-  #   needs: pack
-  #   permissions:
-  #     actions: read
-  #     id-token: write
-  #     contents: write
-  #   uses: Ed-Fi-Alliance-OSS/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@main
-  #   with:
-  #     base64-subjects: ${{ needs.pack.outputs.hash-code }}
-  #     provenance-name: AdminApi.intoto.jsonl
-  #     upload-assets: true
-  #     # TODO: remove this after this issue is resolved: https://github.com/slsa-framework/slsa-github-generator/issues/876
-  #     compile-generator: true
-
   publish-package:
     name: Publish NuGet Package
     needs: pack
@@ -263,20 +247,17 @@ jobs:
           if [[ $PACKAGEVERSION =~ "alpha" ]]
           then
             # Pre-releases get the tag "pre"
-            APITAGS="${{ env.IMAGE_NAME }}:pre"
-            DBTAGS="${{ env.DATABASE_IMAGE_NAME }}:pre"
+            WORKER_TAGS="${{ env.IMAGE_NAME }}:pre"
           else
             # Releases get the version, plus shortened form for minor release.
             # We are not using shortened form for major or using "latest"
             # because they are too imprecise.
             MINOR=`echo ${PACKAGEVERSION} | awk -F"." '{print $1"."$2}'`
-            APITAGS="${{ env.IMAGE_NAME }}:${PACKAGEVERSION},${{ env.IMAGE_NAME }}:${MINOR}"
-            DBTAGS="${{ env.DATABASE_IMAGE_NAME }}:${PACKAGEVERSION},${{ env.DATABASE_IMAGE_NAME }}:${MINOR}"
+            WORKER_TAGS="${{ env.IMAGE_NAME }}:${PACKAGEVERSION},${{ env.IMAGE_NAME }}:${MINOR}"
           fi
 
           SEMVERSION=${PACKAGEVERSION:1}  # strip off the leading 'v'
-          echo "APITAGS=$APITAGS" >> $GITHUB_OUTPUT
-          echo "DBTAGS=$DBTAGS" >> $GITHUB_OUTPUT
+          echo "WORKER_TAGS=$WORKER_TAGS" >> $GITHUB_OUTPUT
           echo "VERSION=$SEMVERSION" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
@@ -288,38 +269,21 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_HUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for admin api image
+      - name: Extract metadata (tags, labels) for Health Check worker image
         id: metaapi
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934  # v5.0.0
         with:
           images: ${{ env.IMAGE_NAME }}
 
-      - name: Build and push admin api image
+      - name: Build and push Health Check worker image
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09  # v5.0.0
         with:
           context: "{{defaultContext}}:Docker"
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:pre
           cache-to: type=inline
           build-args: VERSION=${{ steps.prepare-tags.outputs.VERSION }}
-          file: api.pgsql.Dockerfile
-          tags: ${{ steps.prepare-tags.outputs.APITAGS }}
+          file: Dockerfile
+          tags: ${{ steps.prepare-tags.outputs.WORKER_TAGS }}
           labels: ${{ steps.metaapi.outputs.labels }}
           push: true
 
-      # - name: Extract metadata (tags, labels) for admin api database image
-      #   id: metadatabase
-      #   uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934  # v5.0.0
-      #   with:
-      #     images: ${{ env.DATABASE_IMAGE_NAME }}
-
-      # - name: Build and push admin api database image
-      #   uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09  # v5.0.0
-      #   with:
-      #     context: "{{defaultContext}}:Docker/Settings/DB-Admin/pgsql"
-      #     cache-from: type=registry,ref=${{ env.DATABASE_IMAGE_NAME }}:pre
-      #     cache-to: type=inline
-      #     build-args: VERSION=${{ steps.prepare-tags.outputs.VERSION }}
-      #     file: Dockerfile
-      #     tags: ${{ steps.prepare-tags.outputs.DBTAGS }}
-      #     labels: ${{ steps.metadatabase.outputs.labels }}
-      #     push: true
