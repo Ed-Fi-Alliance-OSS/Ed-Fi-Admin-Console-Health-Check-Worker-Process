@@ -23,6 +23,6 @@ public class AdminApiInstanceDocument
     public string ClientId { get; set; } = string.Empty;
     public string ClientSecret { get; set; } = string.Empty;
     public string BaseUrl { get; set; } = string.Empty;
-    public string ResourcesUrl { get; set; } = string.Empty;
-    public string AuthenticationUrl { get; set; } = string.Empty;
+    //public string ResourcesUrl { get; set; } = string.Empty;
+    //public string AuthenticationUrl { get; set; } = string.Empty;
 }

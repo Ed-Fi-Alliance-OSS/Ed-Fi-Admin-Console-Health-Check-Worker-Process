@@ -42,8 +42,8 @@ public class Given_an_ods_environment_with_single_tenant
             var httpClient = A.Fake<IAppHttpClient>();
             var adminApiInstance = Testing.AdminApiInstances.First();
             var encodedKeySecret = Encoding.ASCII.GetBytes($"{adminApiInstance.ClientId}:{adminApiInstance.ClientSecret}");
-            var authFullUrl = adminApiInstance.BaseUrl + adminApiInstance.AuthenticationUrl;
-            var resourceFullUrl = adminApiInstance.BaseUrl + adminApiInstance.ResourcesUrl;
+            var authFullUrl = adminApiInstance.BaseUrl + Constants.AuthenticationUri;
+            var resourceFullUrl = adminApiInstance.BaseUrl + Constants.ResourcesUri;
             var headers = new HttpResponseMessage().Headers;
             headers.Add(Constants.TotalCountHeader, "5");
 
@@ -73,8 +73,8 @@ public class Given_an_ods_environment_with_single_tenant
             var httpClient = A.Fake<IAppHttpClient>();
             var adminApiInstance = Testing.AdminApiInstances.First();
             var encodedKeySecret = Encoding.ASCII.GetBytes($"{adminApiInstance.ClientId}:{adminApiInstance.ClientSecret}");
-            var authFullUrl = adminApiInstance.BaseUrl + adminApiInstance.AuthenticationUrl;
-            var resourceFullUrl = adminApiInstance.BaseUrl + adminApiInstance.ResourcesUrl;
+            var authFullUrl = adminApiInstance.BaseUrl + Constants.AuthenticationUri;
+            var resourceFullUrl = adminApiInstance.BaseUrl + Constants.ResourcesUri;
 
             var headers = new HttpResponseMessage().Headers;
             headers.Add(Constants.TotalCountHeader, "5");
@@ -89,7 +89,7 @@ public class Given_an_ods_environment_with_single_tenant
             var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings(), new CommandArgs(_configuration));
 
             var response = await odsApiClient.OdsApiGet(
-                adminApiInstance.BaseUrl + adminApiInstance.AuthenticationUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.BaseUrl + adminApiInstance.ResourcesUrl, "Get Total Count from Ods Api");
+                adminApiInstance.BaseUrl + Constants.AuthenticationUri, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.BaseUrl + Constants.ResourcesUri, "Get Total Count from Ods Api");
 
             response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
         }
