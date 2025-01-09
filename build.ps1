@@ -31,7 +31,7 @@
 param(
     # Command to execute, defaults to "Build".
     [string]
-    [ValidateSet("Clean", "Build", "UnitTest","PackageHealthWorker", "BuildAndPublish")]
+    [ValidateSet("Clean", "Build", "UnitTest","PackageHealthWorker", "BuildAndPublish", "BuildPackage")]
     $Command = "Build",
 
     # Assembly and package version number for the Data Management Service. The
@@ -102,7 +102,7 @@ function Restore {
 
 function SetHealthWorkerAssemblyInfo {
     Invoke-Execute {
-        $assembly_version = $DMSVersion
+        $assembly_version = $Version
 
         Invoke-RegenerateFile "$solutionRoot/Directory.Build.props" @"
 <Project>
@@ -240,7 +240,6 @@ Invoke-Main {
         Clean { Invoke-Clean }
         Build { Invoke-Build }
         BuildAndPublish {
-            Invoke-SetAssemblyInfo
             Invoke-Build
             Invoke-Publish
          }
