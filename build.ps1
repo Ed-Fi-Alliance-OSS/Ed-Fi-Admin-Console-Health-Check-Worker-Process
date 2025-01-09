@@ -190,13 +190,14 @@ function PublishHealthWorker {
 }
 
 function Invoke-Build {
+    Write-Output "Building HealthCheck worker binaries ($Version)"
     Invoke-Step { DotNetClean }
     Invoke-Step { Restore }
     Invoke-Step { Compile }
 }
 
 function Invoke-Publish {
-    Write-Output "Building Version ($Version)"
+    Write-Output "Publishing Health Worker ($Version)"
 
     Invoke-Step { PublishHealthWorker }
 }
@@ -220,7 +221,7 @@ function Invoke-TestExecution {
     )
     switch ($Filter) {
         UnitTests { Invoke-Step { UnitTests } }
-        Default { "Unknow Test Type" }
+        Default { "Unknown Test Type" }
     }
 }
 
