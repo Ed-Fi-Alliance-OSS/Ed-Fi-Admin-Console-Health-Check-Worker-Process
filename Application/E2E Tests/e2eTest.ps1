@@ -86,10 +86,6 @@ if ($response.StatusCode -ne 200) {
 # Check if the response is an array
 Write-Host "Check response..."
 if ($response.Body -is [System.Collections.IEnumerable]) {
-
-    Write-Host "*******************************************"
-    Write-Host $response
-
     # Iterate through each item in the array
     foreach ($healthcheckItem in $response.Body) {
         if ($healthcheckItem.document.healthy -ne $True) {
@@ -98,27 +94,6 @@ if ($response.Body -is [System.Collections.IEnumerable]) {
         else {
             Write-Host "Instance: ${healthcheckItem.document.instanceId} is healthy"
         }
-
-        # if ($healthcheckItem.document.studentSchoolAssociations -ne 3230) {
-        #     Write-Error "Count value for: studentSchoolAssociations is not correct" -ErrorAction Stop
-        # }
-        # else {
-        #     Write-Host "Total count for studentSchoolAssociations looks good."
-        # }
-
-        # if ($healthcheckItem.document.sections -ne 1376) {
-        #     Write-Error "Count value for: sections is not correct" -ErrorAction Stop
-        # }
-        # else {
-        #     Write-Host "Total count for sections looks good."
-        # }
-
-        # if ($healthcheckItem.document.studentSectionAssociations -ne 50242) {
-        #     Write-Error "Count value for: studentSectionAssociations is not correct" -ErrorAction Stop
-        # }
-        # else {
-        #     Write-Host "Total count for studentSectionAssociations looks good."
-        # }
     }
 } else {
     Write-Error "HealthCheck response is not an array." -ErrorAction Stop
