@@ -31,7 +31,7 @@
 param(
     # Command to execute, defaults to "Build".
     [string]
-    [ValidateSet("Clean", "Build", "UnitTest","PackageHealthWorker")]
+    [ValidateSet("Clean", "Build", "UnitTest","PackageHealthWorker", "BuildAndPublish")]
     $Command = "Build",
 
     # Assembly and package version number for the Data Management Service. The
