@@ -1,9 +1,9 @@
 {
   "applicationName": "first application",
-  "vendorId": 7,
+  "vendorId": 123456789,
   "claimSetName": "Ed-Fi API Publisher - Reader",
   "educationOrganizationIds": [
-    255901002
+    0
   ],
   "odsInstanceIds": [
     1
