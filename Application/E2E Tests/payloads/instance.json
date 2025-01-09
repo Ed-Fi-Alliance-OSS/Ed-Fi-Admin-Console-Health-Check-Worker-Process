@@ -8,8 +8,6 @@
         "instanceName": "instance 1",
         "clientId": "%key%",
         "clientSecret": "%secret%",
-        "baseUrl": "https://localhost/api",
-        "resourcesUrl":"/data/v3/ed-fi/", 
-        "authenticationUrl": "/oauth/token/"
+        "baseUrl": "https://localhost/api"
     }
 }
