@@ -59,8 +59,8 @@ jobs:
           $healthWorkerVersion = "${{ steps.versions.outputs.health-worker-semver }}"
 
           ./build.ps1 -Command BuildAndPublish `
-              -Configuration Release `
               -HealthWorkerVersion $healthWorkerVersion
+              -Configuration Release `
 
       - name: Setup Nuget.exe
         uses: nuget/setup-nuget@a21f25cd3998bf370fde17e3f1b4c12c175172f9 #v2.0.0

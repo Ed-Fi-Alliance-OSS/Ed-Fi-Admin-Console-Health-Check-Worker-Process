@@ -54,6 +54,7 @@ param(
     $IsLocalBuild
 )
 
+$applicatonRoot = "$solutionRoot"
 $solutionRoot = "$PSScriptRoot/Application"
 $defaultSolution = "$solutionRoot/EdFi.AdminConsole.HealthCheckService.sln"
 $projectName = "Ed-Fi-Admin-Console-Health-Check-Worker-Process"
@@ -102,7 +103,7 @@ function Restore {
 
 function SetHealthWorkerAssemblyInfo {
     Invoke-Execute {
-        $assembly_version = $Version
+        $assembly_version = $HealthWorkerVersion
 
         Invoke-RegenerateFile "$solutionRoot/Directory.Build.props" @"
 <Project>
@@ -183,14 +184,14 @@ function UnitTests {
 
 function PublishHealthWorker {
     Invoke-Execute {
-        $project = "$applicationRoot/$projectName/"
+        $project = "$defaultSolution/$projectName/"
         $outputPath = "$project/publish"
-        dotnet publish $project -c $Configuration -o $outputPath --nologo
+        dotnet publish  -c $Configuration -o $outputPath --nologo
     }
 }
 
 function Invoke-Build {
-    Write-Output "Building HealthCheck worker binaries ($Version)"
+    Write-Output "Building HealthCheck worker binaries ($HealthWorkerVersion)"
     Invoke-Step { DotNetClean }
     Invoke-Step { Restore }
     Invoke-Step { Compile }
