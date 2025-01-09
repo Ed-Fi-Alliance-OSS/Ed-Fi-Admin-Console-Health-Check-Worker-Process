@@ -1,0 +1,156 @@
+# SPDX-License-Identifier: Apache-2.0
+# Licensed to the Ed-Fi Alliance under one or more agreements.
+# The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
+# See the LICENSE and NOTICES files in the project root for more information.
+
+version: '3.8'
+
+services:
+  db-ods-tenant1:
+    image: edfialliance/ods-api-db-ods-minimal:${TAG}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TPDM_ENABLED: ${TPDM_ENABLED:-true}
+      POSTGRES_PORT: 5432
+    volumes:
+      - vol-db-ods-tenant1:/var/lib/postgresql/data
+    restart: always
+    container_name: ed-fi-db-ods-tenant1
+    hostname: ed-fi-db-ods
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready  -U ${POSTGRES_USER}
+      start_period: 60s
+      retries: 3
+
+  db-admin-tenant1:
+    image: ${ADMIN_DB_IMAGE:-edfialliance/ods-api-db-admin:${TAG}}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ODS_POSTGRES_HOST: ed-fi-db-ods-tenant1
+      POSTGRES_PORT: 5432
+      TENANT_IDENTIFIER: tenant1
+    volumes:
+      - vol-db-admin-tenant1:/var/lib/postgresql/data
+      - ./bootstrap.sh:/docker-entrypoint-initdb.d/2-bootstrap.sh
+    restart: always
+    container_name: ed-fi-db-admin-tenant1
+    hostname: ed-fi-db-admin-tenant1
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready  -U ${POSTGRES_USER}
+      start_period: 60s
+      retries: 3
+
+  api:
+    image: edfialliance/ods-api-web-api:${TAG}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: 5432
+      PATH_BASE: ${ODS_VIRTUAL_NAME:-api}
+      TPDM_ENABLED: ${TPDM_ENABLED:-true}
+      ODS_WAIT_POSTGRES_HOSTS: 'db-ods-tenant1 '
+      API_HEALTHCHECK_TEST: ${API_HEALTHCHECK_TEST?Please consult env.example to set
+        the API healthcheck test}
+      NPG_POOLING_ENABLED: ${NPG_POOLING_ENABLED:-false}
+      NPG_API_MAX_POOL_SIZE_ODS: ${NPG_API_MAX_POOL_SIZE_ODS}
+      NPG_API_MAX_POOL_SIZE_ADMIN: ${NPG_API_MAX_POOL_SIZE_ADMIN}
+      NPG_API_MAX_POOL_SIZE_SECURITY: ${NPG_API_MAX_POOL_SIZE_SECURITY}
+      NPG_API_MAX_POOL_SIZE_MASTER: ${NPG_API_MAX_POOL_SIZE_MASTER}
+      ODS_CONNECTION_STRING_ENCRYPTION_KEY: ${ODS_CONNECTION_STRING_ENCRYPTION_KEY}
+      ASPNETCORE_ENVIRONMENT: docker
+    volumes:
+      - ${LOGS_FOLDER}:/app/logs
+      - ./appsettings.dockertemplate.json:/app/appsettings.dockertemplate.json
+    ports:
+      - ${API_PORT:-8001}:80
+    entrypoint:
+      - /bin/sh
+    command:
+      - '-c'
+      - envsubst < /app/appsettings.dockertemplate.json >
+        /app/appsettings.docker.json && /app/run.sh
+    depends_on:
+      - db-ods-tenant1
+      - db-admin-tenant1
+    restart: always
+    hostname: api
+    container_name: ed-fi-ods-api
+    healthcheck:
+      test: $$API_HEALTHCHECK_TEST
+      start_period: 60s
+      retries: 3
+
+  adminapi:
+    image: edfialliance/ods-admin-api:${ADMINAPI_TAG}
+    environment:
+      ADMIN_WAIT_POSTGRES_HOSTS: 'db-admin-tenant1 '
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASEENGINE: PostgreSql
+      AUTHORITY: ${AUTHORITY}
+      ISSUER_URL: ${ISSUER_URL}
+      SIGNING_KEY: ${SIGNING_KEY}
+      ADMIN_API_VIRTUAL_NAME: ${ADMIN_API_VIRTUAL_NAME:-adminapi}
+      AppSettings__MultiTenancy: ${MULTITENANCY_ENABLED:-true}
+      AppSettings__DatabaseEngine: PostgreSQL
+      ASPNETCORE_ENVIRONMENT: multitenantdocker
+      Authentication__AllowRegistration: 'true'
+      SwaggerSettings__EnableSwagger: 'true'
+      SwaggerSettings__DefaultTenant: ${SWAGGER_DEFAULT_TENANT:-tenant1}
+      AppSettings__EnableAdminConsoleAPI: ${ENABLE_ADMINCONSOLE:-true}
+      AdminConsoleSettings__CorsSettings__EnableCors: ${ADMINCONSOLE_ENABLE_CORS:-true}
+      AdminConsoleSettings__CorsSettings__AllowedOrigins: ${ADMINCONSOLE_ALLOWED_ORIGINS:-"[https://localhost/adminconsole]"}
+    volumes:
+      - ./appsettings.dockertemplate.json:/app/appsettings.dockertemplate.json
+    ports:
+      - ${ADMIN_API_PORT:-8003}:80
+    entrypoint:
+      - /bin/sh
+    command:
+      - '-c'
+      - envsubst < /app/appsettings.dockertemplate.json >
+        /app/appsettings.multitenantdocker.json && /app/run.sh
+    depends_on:
+      - db-admin-tenant1
+    restart: always
+    hostname: ${ADMIN_API_VIRTUAL_NAME:-adminapi}
+    container_name: ed-fi-adminapi
+    healthcheck:
+      test: ${ADMIN_API_HEALTHCHECK_TEST}
+      start_period: 60s
+      retries: 3
+
+  swagger:
+    image: edfialliance/ods-api-swaggerui:${TAG:-7.1}
+    environment:
+      SAMPLE_KEY: ${CLIENT_ID}
+      SAMPLE_SECRET: ${CLIENT_SECRET}
+      VERSION_URL: ${VERSION_URL}
+      SWAGGER_HEALTHCHECK_TEST: ${SWAGGER_HEALTHCHECK_TEST?Please consult env.example to set the SWAGGER healthcheck test}
+    ports:
+      - ${SWAGGER_PORT:-8002}:80
+    depends_on:
+      - api
+    restart: always
+    container_name: ed-fi-swagger
+    hostname: ed-fi-swagger
+    healthcheck:
+      test: ${SWAGGER_HEALTHCHECK_TEST}
+      start_period: "60s"
+      retries: 3
+      
+volumes:
+  vol-db-admin-tenant1:
+    driver: local
+    name: vol-db-admin-tenant1
+  vol-db-ods-tenant1:
+    driver: local
+    name: vol-db-ods-tenant1
+  shared_data:

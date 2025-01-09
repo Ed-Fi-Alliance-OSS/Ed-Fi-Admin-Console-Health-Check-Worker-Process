@@ -12,7 +12,6 @@ Read-EnvVariables
 $adminApiUrl = $env:ADMIN_API
 $adminConsoleInstancesUrl = "$env:ADMIN_API/adminconsole/instances"
 $AdminConsoleHealthCheckUrl = "$env:ADMIN_API/adminconsole/healthcheck"
-$AdminConsoleHealthCheckWorkerProcessPath = $env:ADMIN_CONSOLE_HEALTHCHECK_WORKER_PROCESS_PATH
 
 [System.Environment]::SetEnvironmentVariable("clientId", "client-$(New-Guid)")
 [System.Environment]::SetEnvironmentVariable("clientSecret", $env:CLIENT_SECRET)
@@ -68,24 +67,7 @@ if ($response.StatusCode -ne 201) {
 }
 Remove-Item -Path "$PSScriptRoot/payloads/instanceCopy.json"
 
-########## KEEP THIS SECTION?
-# # 4.local Call worker Local  
-# Set-Location $AdminConsoleHealthCheckWorkerProcessPath
-
-# $clientIdArg = "--ClientId=$clientId"
-# $clientSecretArg = "--ClientSecret=$clientSecret"
-# $multitenancyArg = "--IsMultiTenant=true"
-# $tenantArg = "--Tenant=$env:DEFAULTTENANT"
-# $dotnetApp = "EdFi.AdminConsole.HealthCheckService.dll"
-
-# Write-Host "Call Ed-Fi-Admin-Console-Health-Check-Worker-Process..."
-# dotnet $dotnetApp $clientIdArg $clientSecretArg $multitenancyArg $tenantArg
-
-# Set-Location -Path $PSScriptRoot
-########## KEEP THIS SECTION?
-
 # 4. Call docker to run healthcheck-cli
-
 Set-Location "$PSScriptRoot/../../"
 Write-Host "Build Ed-Fi-Admin-Console-Health-Check-Worker-Process..."
 docker build -f $PSScriptRoot/../../Docker/Dockerfile -t edfi.adminconsole.healthcheckservice .
