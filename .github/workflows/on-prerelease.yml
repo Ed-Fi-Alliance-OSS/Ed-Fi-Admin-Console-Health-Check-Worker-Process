@@ -58,7 +58,7 @@ jobs:
         run: |
           $healthWorkerVersion = "${{ steps.versions.outputs.health-worker-semver }}"
 
-          ./build.ps1 -Command Build `
+          ./build.ps1 -Command BuildAndPublish `
               -Configuration Release `
               -HealthWorkerVersion $healthWorkerVersion
 

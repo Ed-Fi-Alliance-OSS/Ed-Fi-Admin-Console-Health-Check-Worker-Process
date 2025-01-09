@@ -100,7 +100,7 @@ function Restore {
     Invoke-Execute { dotnet restore $defaultSolution }
 }
 
-function SetDMSAssemblyInfo {
+function SetHealthWorkerAssemblyInfo {
     Invoke-Execute {
         $assembly_version = $DMSVersion
 
@@ -125,6 +125,31 @@ function SetDMSAssemblyInfo {
 function Compile {
     Invoke-Execute {
         dotnet build $defaultSolution -c $Configuration --nologo --no-restore
+    }
+}
+
+function PushPackage {
+    Invoke-Execute {
+        if (-not $NuGetApiKey) {
+            throw "Cannot push a NuGet package without providing an API key in the `NuGetApiKey` argument."
+        }
+
+        if (-not $EdFiNuGetFeed) {
+            throw "Cannot push a NuGet package without providing a feed in the `EdFiNuGetFeed` argument."
+        }
+
+        if (-not $PackageFile) {
+            $PackageFile = "$PSScriptRoot/$packageName.$DMSVersion.nupkg"
+        }
+
+        if ($DryRun) {
+            Write-Info "Dry run enabled, not pushing package."
+        }
+        else {
+            Write-Info ("Pushing $PackageFile to $EdFiNuGetFeed")
+
+            dotnet nuget push $PackageFile --api-key $NuGetApiKey --source $EdFiNuGetFeed
+        }
     }
 }
 
@@ -156,10 +181,28 @@ function UnitTests {
     Invoke-Execute { RunTests -Filter "*.UnitTests" }
 }
 
+function PublishHealthWorker {
+    Invoke-Execute {
+        $project = "$applicationRoot/$projectName/"
+        $outputPath = "$project/publish"
+        dotnet publish $project -c $Configuration -o $outputPath --nologo
+    }
+}
+
 function Invoke-Build {
     Invoke-Step { DotNetClean }
     Invoke-Step { Restore }
     Invoke-Step { Compile }
+}
+
+function Invoke-Publish {
+    Write-Output "Building Version ($Version)"
+
+    Invoke-Step { PublishHealthWorker }
+}
+
+function Invoke-PushPackage {
+    Invoke-Step { PushPackage }
 }
 
 function Invoke-Clean {
@@ -181,6 +224,12 @@ function Invoke-TestExecution {
     }
 }
 
+function Invoke-SetAssemblyInfo {
+    Write-Output "Setting Assembly Information"
+
+    Invoke-Step { SetHealthWorkerAssemblyInfo }
+}
+
 Invoke-Main {
     if ($IsLocalBuild) {
         $nugetExePath = Install-NugetCli
@@ -189,6 +238,13 @@ Invoke-Main {
     switch ($Command) {
         Clean { Invoke-Clean }
         Build { Invoke-Build }
+        BuildAndPublish {
+            Invoke-SetAssemblyInfo
+            Invoke-Build
+            Invoke-Publish
+         }
+        BuildPackage { Invoke-BuildPackage }
+        Push { Invoke-PushPackage }
         UnitTest { Invoke-TestExecution UnitTests }
         default { throw "Command '$Command' is not recognized" }
     }
