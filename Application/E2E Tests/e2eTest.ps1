@@ -29,7 +29,7 @@ if ($response.StatusCode -ne 200) {
 
 # 2. Get Token from Admin Api
 Write-Host "Get token..."
-$response = Get-Token -clientId $clientId -clientSecret $clientSecret
+$response = Get-Token -clientId $env:clientId -clientSecret $env:clientSecret
 if ($response.StatusCode -ne 200) {
     Write-Error "Not able to get token on Admin Api." -ErrorAction Stop
 }
@@ -74,7 +74,7 @@ docker build -f $PSScriptRoot/../../Docker/Dockerfile -t edfi.adminconsole.healt
 Set-Location -Path $PSScriptRoot
 
 Write-Host "Call Ed-Fi-Admin-Console-Health-Check-Worker-Process..."
-docker run -it edfi.adminconsole.healthcheckservice --isMultiTenant=true --tenant="$env:DEFAULTTENANT" --ClientId="$clientId" --ClientSecret="$clientSecret"
+docker run -it edfi.adminconsole.healthcheckservice --isMultiTenant=true --tenant="$env:DEFAULTTENANT" --ClientId="$env:clientId" --ClientSecret="$env:clientSecret"
 
 # 5. Get HealthCheck
 Write-Host "Get HealthCheck..."
@@ -89,10 +89,10 @@ if ($response.Body -is [System.Collections.IEnumerable]) {
     # Iterate through each item in the array
     foreach ($healthcheckItem in $response.Body) {
         if ($healthcheckItem.document.healthy -ne $True) {
-            Write-Error "Instance: ${healthcheckItem.document.instanceId} is not healthy" -ErrorAction Stop
+            Write-Error "Instance is not healthy" -ErrorAction Stop
         }
         else {
-            Write-Host "Instance: ${healthcheckItem.document.instanceId} is healthy"
+            Write-Host "Instance is healthy"
         }
     }
 } else {

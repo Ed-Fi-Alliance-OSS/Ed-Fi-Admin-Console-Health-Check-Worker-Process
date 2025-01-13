@@ -60,14 +60,14 @@ public class Given_an_ods_api
             A.CallTo(() => _odsApiClient.OdsApiGet(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, "http://www.myserver.com/data/v3/ed-fi/thirdEndPoint?offset=0&limit=0&totalCount=true", "Get HealthCheck data from Ods Api"))
                 .Returns(new ApiResponse(HttpStatusCode.OK, string.Empty, httpResponse3.Headers));
 
-            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{Constants.ResourcesUri}firstEndPoint"))
-                .Returns($"{adminApiInstance.BaseUrl}{Constants.ResourcesUri}firstEndPoint{Constants.OdsApiQueryParams}");
+            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{adminApiInstance.ResourcesUrl}firstEndPoint"))
+                .Returns($"{adminApiInstance.BaseUrl}{adminApiInstance.ResourcesUrl}firstEndPoint{Constants.OdsApiQueryParams}");
 
-            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{Constants.ResourcesUri}secondEndpoint"))
-                .Returns($"{adminApiInstance.BaseUrl}{Constants.ResourcesUri}secondEndpoint{Constants.OdsApiQueryParams}");
+            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{adminApiInstance.ResourcesUrl}secondEndpoint"))
+                .Returns($"{adminApiInstance.BaseUrl}{adminApiInstance.ResourcesUrl}secondEndpoint{Constants.OdsApiQueryParams}");
 
-            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{Constants.ResourcesUri}thirdEndPoint"))
-                .Returns($"{adminApiInstance.BaseUrl}{Constants.ResourcesUri}thirdEndPoint{Constants.OdsApiQueryParams}");
+            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{adminApiInstance.ResourcesUrl}thirdEndPoint"))
+                .Returns($"{adminApiInstance.BaseUrl}{adminApiInstance.ResourcesUrl}thirdEndPoint{Constants.OdsApiQueryParams}");
 
             _odsApiCaller = new OdsApiCaller(_logger, _odsApiClient, new AppSettingsOdsApiEndpoints(Testing.GetOdsApiSettings()), commandArgs, _odsResourceEndpointUrlBuilder);
         }

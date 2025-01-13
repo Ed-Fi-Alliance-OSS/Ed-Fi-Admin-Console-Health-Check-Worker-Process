@@ -21,6 +21,12 @@ public static class InstanceValidator
             if (string.IsNullOrEmpty(instance.BaseUrl))
                 messages.Add("BaseUrl is required.");
 
+            if (string.IsNullOrEmpty(instance.AuthenticationUrl))
+                messages.Add("AuthenticationUrl is required.");
+
+            if (string.IsNullOrEmpty(instance.ResourcesUrl))
+                messages.Add("ResourcesUrl is required.");
+
             if (string.IsNullOrEmpty(instance.ClientId))
                 messages.Add("ClientId is required.");
 

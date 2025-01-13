@@ -82,6 +82,8 @@ public class Testing
                     ClientId = "one client",
                     ClientSecret = "one secret",
                     BaseUrl = "http://www.myserver.com",
+                    AuthenticationUrl = "/connect/token",
+                    ResourcesUrl = "/data/v3/ed-fi/",
                 },
                 new AdminApiInstanceDocument()
                 {
@@ -91,6 +93,8 @@ public class Testing
                     ClientId = "another client",
                     ClientSecret = "another secret",
                     BaseUrl = "http://www.otherserver.com",
+                    AuthenticationUrl = "/connect/token",
+                    ResourcesUrl = "/data/v3/ed-fi/",
                 }
             };
         }

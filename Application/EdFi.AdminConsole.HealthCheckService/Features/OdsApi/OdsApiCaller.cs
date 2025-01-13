@@ -38,9 +38,9 @@ public class OdsApiCaller : IOdsApiCaller
 
         foreach (var appSettingsOdsApiEndpoint in _appSettingsOdsApiEndpoints)
         {
-            var odsResourceEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(instance.BaseUrl, $"{Constants.ResourcesUri}{appSettingsOdsApiEndpoint}");
+            var odsResourceEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(instance.BaseUrl, $"{instance.ResourcesUrl}{appSettingsOdsApiEndpoint}");
 
-            var odsAuthEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsAuthEndpointUrl(instance.BaseUrl, Constants.AuthenticationUri);
+            var odsAuthEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsAuthEndpointUrl(instance.BaseUrl, instance.AuthenticationUrl);
 
             tasks.Add(Task.Run(() => GetCountPerEndpointAsync(
                 appSettingsOdsApiEndpoint, odsAuthEndpointUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));

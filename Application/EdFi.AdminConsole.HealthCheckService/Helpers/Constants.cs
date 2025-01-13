@@ -12,9 +12,5 @@ namespace EdFi.AdminConsole.HealthCheckService.Helpers
         public const string TotalCountHeader = "total-count";
 
         public const string TenantHeader = "tenant";
-
-        public const string ResourcesUri = "/data/v3/ed-fi/";
-
-        public const string AuthenticationUri = "/oauth/token/";
     }
 }
