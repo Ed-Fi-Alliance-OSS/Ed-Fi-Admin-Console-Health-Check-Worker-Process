@@ -186,7 +186,7 @@ function PublishHealthWorker {
     Invoke-Execute {
         $projectRoot = "$solutionRoot/$projectName"
         $outputPath = "$projectRoot/publish"
-        dotnet publish $project -c $Configuration -o $outputPath --nologo
+        dotnet publish $projectRoot -c $Configuration -o $outputPath --nologo
     }
 }
 
