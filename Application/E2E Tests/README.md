@@ -13,7 +13,9 @@ Once this environment is up and running, we run the `e2eTest.ps1` script, which 
 1. Create your  `.env` file using the `.env.example` as a reference. This file is used by the `e2eTest.ps1` script.
 2. Go to the /docker folder and create your `.env` file using the `.env.example` as a reference. This file is necessary to create the docker containers.
 3. Execute the `start.ps1` script, and wait about 10 or 15 seconds.
-4. Once the environment is up and running on docker, execute the `e2eTest.ps1` script.
+4. Once the environment is up and running on docker, go back to the `E2E Tests` folder and execute the `e2eTest.ps1` script.
+
+To stop the services, run `start.ps1 -d` (for "down") or `start.ps1 -d -v` to stop and remove volumes.
 
 ## Some other notes
 
