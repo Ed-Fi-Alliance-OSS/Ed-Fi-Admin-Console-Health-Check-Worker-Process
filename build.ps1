@@ -84,14 +84,6 @@ function RunNuGetPack {
     dotnet pack $ProjectPath --output $PSScriptRoot -p:NuspecFile=$nuspecPath -p:NuspecProperties="version=$PackageVersion" /p:NoWarn='"NU5100;NU5110;NU5111"'
 }
 
-function PackageHealthWorker {
-    $project = "EdFi.AdminConsole.HealthCheckService"
-    $mainPath = "$solutionRoot/$project"
-    $projectPath = "$mainPath/$project.csproj"
-    $nugetSpecPath = "$mainPath/publish/$project.nuspec"
-
-    RunNuGetPack -ProjectPath $projectPath -PackageVersion $APIVersion $nugetSpecPath
-}
 function DotNetClean {
     Invoke-Execute { dotnet clean $defaultSolution -c $Configuration --nologo -v minimal }
 }
@@ -123,10 +115,10 @@ function SetHealthWorkerAssemblyInfo {
 }
 
 function BuildPackage {
-    # $mainPath = "$applicationRoot/$projectName"
-    $projectPath = "$solutionRoot/$projectName.csproj"
+    $mainPath = "$solutionRoot/$projectName"
+    $projectPath = "$mainPath/$projectName.csproj"
     # $projectPath = "$mainPath/$projectName.csproj"
-    $nugetSpecPath = "$projectPath/publish/$projectName.nuspec"
+    $nugetSpecPath = "$mainPath/publish/$projectName.nuspec"
 
     RunNuGetPack -ProjectPath $projectPath -PackageVersion $DMSVersion $nugetSpecPath
 }
