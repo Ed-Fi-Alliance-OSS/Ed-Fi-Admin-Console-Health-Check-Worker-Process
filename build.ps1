@@ -115,12 +115,11 @@ function SetHealthWorkerAssemblyInfo {
 }
 
 function BuildPackage {
-    $mainPath = "$solutionRoot/$projectName"
-    $projectPath = "$mainPath/$projectName.csproj"
-    # $projectPath = "$mainPath/$projectName.csproj"
-    $nugetSpecPath = "$mainPath/publish/$projectName.nuspec"
+    $projectRoot = "$solutionRoot/$projectName"
+    $projectPath = "$projectRoot/$projectName.csproj"
+    $nugetSpecPath = "$projectRoot/publish/$projectName.nuspec"
 
-    RunNuGetPack -ProjectPath $projectPath -PackageVersion $DMSVersion $nugetSpecPath
+    RunNuGetPack -ProjectPath $projectPath -PackageVersion $HealthWorkerVersion $nugetSpecPath
 }
 
 function Compile {
