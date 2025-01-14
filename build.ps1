@@ -122,6 +122,15 @@ function SetHealthWorkerAssemblyInfo {
     }
 }
 
+function BuildPackage {
+    # $mainPath = "$applicationRoot/$projectName"
+    $projectPath = "$solutionRoot/$projectName/"
+    # $projectPath = "$mainPath/$projectName.csproj"
+    $nugetSpecPath = "$projectPath/publish/"
+
+    RunNuGetPack -ProjectPath $projectPath -PackageVersion $DMSVersion $nugetSpecPath
+}
+
 function Compile {
     Invoke-Execute {
         dotnet build $defaultSolution -c $Configuration --nologo --no-restore
@@ -197,9 +206,12 @@ function Invoke-Build {
     Invoke-Step { Compile }
 }
 
+function Invoke-BuildPackage {
+    Invoke-Step { BuildPackage }
+}
+
 function Invoke-Publish {
     Write-Output "Publishing Health Worker ($HealthWorkerVersion)"
-
     Invoke-Step { PublishHealthWorker }
 }
 
@@ -244,6 +256,7 @@ Invoke-Main {
             Invoke-Build
             Invoke-Publish
          }
+        PackageHealthWorker { Invoke-PackageHealthWorker}
         BuildPackage { Invoke-BuildPackage }
         Push { Invoke-PushPackage }
         UnitTest { Invoke-TestExecution UnitTests }
