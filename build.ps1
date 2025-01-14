@@ -117,7 +117,7 @@ function SetHealthWorkerAssemblyInfo {
 function BuildPackage {
     $projectRoot = "$solutionRoot/$projectName"
     $projectPath = "$projectRoot/$projectName.csproj"
-    $nugetSpecPath = "$projectRoot/publish/$projectName.nuspec"
+    $nugetSpecPath = "$projectRoot/$projectName.nuspec"
 
     RunNuGetPack -ProjectPath $projectPath -PackageVersion $HealthWorkerVersion $nugetSpecPath
 }
@@ -184,8 +184,8 @@ function UnitTests {
 function PublishHealthWorker {
     Write-Output "Publishing Health Worker to ($solutionRoot/$projectName/)"
     Invoke-Execute {
-        $project = "$solutionRoot/$projectName/"
-        $outputPath = "$project/publish"
+        $projectRoot = "$solutionRoot/$projectName"
+        $outputPath = "$projectRoot/publish"
         dotnet publish $project -c $Configuration -o $outputPath --nologo
     }
 }
