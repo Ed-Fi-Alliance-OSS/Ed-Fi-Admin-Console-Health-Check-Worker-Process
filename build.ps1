@@ -58,7 +58,6 @@ $solutionRoot = "$PSScriptRoot/Application"
 $defaultSolution = "$solutionRoot/EdFi.AdminConsole.HealthCheckService.sln"
 $projectName = "EdFi.AdminConsole.HealthCheckService"
 $packageName = "Ed-Fi-Admin-Console-Health-Check-Worker-Process"
-$testResults = "$PSScriptRoot/TestResults"
 
 
 $maintainers = "Ed-Fi Alliance, LLC and contributors"
@@ -183,6 +182,7 @@ function UnitTests {
 }
 
 function PublishHealthWorker {
+    Write-Output "Publishing Health Worker to ($solutionRoot/$projectName/)"
     Invoke-Execute {
         $project = "$solutionRoot/$projectName/"
         $outputPath = "$project/publish"
