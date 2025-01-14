@@ -36,13 +36,22 @@ if ($response.StatusCode -ne 200) {
 
 $access_token = $response.Body.access_token
 
-# 3.1 Create vendor and application on admin api
+# 3.1 Create vendor, ods instance and application on admin api
 $response = Invoke-AdminApi -access_token $access_token -filePath "$PSScriptRoot/payloads/vendor.json" -endpoint "vendors"
 if ($response.StatusCode -ne 201) {
     Write-Error "Not able to create vendor on Admin Api." -ErrorAction Stop
 }
 
 $vendorId = $response.ResponseHeaders.location -replace '\D'
+
+Copy-Item -Path "$PSScriptRoot/payloads/odsInstance.json" -Destination "$PSScriptRoot/payloads/odsInstanceCopy.json"
+(Get-Content $PSScriptRoot/payloads/odsInstanceCopy.json).Replace('%Password%', $env:POSTGRES_PASSWORD) | Set-Content $PSScriptRoot/payloads/odsInstanceCopy.json
+
+$response = Invoke-AdminApi -access_token $access_token -filePath "$PSScriptRoot/payloads/odsInstanceCopy.json" -endpoint "odsInstances"
+if ($response.StatusCode -ne 201) {
+    Write-Error "Not able to create ods instance on Admin Api." -ErrorAction Stop
+}
+Remove-Item -Path "$PSScriptRoot/payloads/odsInstanceCopy.json"
 
 Copy-Item -Path "$PSScriptRoot/payloads/application.json" -Destination "$PSScriptRoot/payloads/applicationCopy.json"
 (Get-Content $PSScriptRoot/payloads/applicationCopy.json).Replace('123456789', $vendorId) | Set-Content $PSScriptRoot/payloads/applicationCopy.json
