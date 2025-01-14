@@ -256,7 +256,6 @@ Invoke-Main {
             Invoke-Build
             Invoke-Publish
          }
-        PackageHealthWorker { Invoke-PackageHealthWorker}
         BuildPackage { Invoke-BuildPackage }
         Push { Invoke-PushPackage }
         UnitTest { Invoke-TestExecution UnitTests }

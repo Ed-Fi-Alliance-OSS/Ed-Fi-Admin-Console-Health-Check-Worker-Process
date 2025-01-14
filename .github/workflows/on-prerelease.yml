@@ -72,7 +72,7 @@ jobs:
 
           "Building ${{ env.PACKAGE_NAME }} NuGet Package" | Write-Output
           # Admin Console Health Check Service
-          ./build.ps1 -Command PackageHealthWorker `
+          ./build.ps1 -Command BuildPackage `
               -HealthWorkerVersion  $healthWorkerVersion `
               -Configuration Release
 
