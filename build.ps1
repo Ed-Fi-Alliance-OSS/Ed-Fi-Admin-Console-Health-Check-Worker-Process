@@ -54,12 +54,12 @@ param(
     $IsLocalBuild
 )
 
-$applicatonRoot = "$solutionRoot"
 $solutionRoot = "$PSScriptRoot/Application"
 $defaultSolution = "$solutionRoot/EdFi.AdminConsole.HealthCheckService.sln"
-$projectName = "Ed-Fi-Admin-Console-Health-Check-Worker-Process"
+$projectName = "EdFi.AdminConsole.HealthCheckService"
 $packageName = "Ed-Fi-Admin-Console-Health-Check-Worker-Process"
 $testResults = "$PSScriptRoot/TestResults"
+
 
 $maintainers = "Ed-Fi Alliance, LLC and contributors"
 
@@ -198,7 +198,7 @@ function Invoke-Build {
 }
 
 function Invoke-Publish {
-    Write-Output "Publishing Health Worker ($Version)"
+    Write-Output "Publishing Health Worker ($HealthWorkerVersion)"
 
     Invoke-Step { PublishHealthWorker }
 }
