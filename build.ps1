@@ -184,7 +184,7 @@ function UnitTests {
 
 function PublishHealthWorker {
     Invoke-Execute {
-        $project = "$defaultSolution/$projectName/"
+        $project = "$solutionRoot/$projectName/"
         $outputPath = "$project/publish"
         dotnet publish  -c $Configuration -o $outputPath --nologo
     }
