@@ -46,6 +46,7 @@ $vendorId = $response.ResponseHeaders.location -replace '\D'
 
 Copy-Item -Path "$PSScriptRoot/payloads/odsInstance.json" -Destination "$PSScriptRoot/payloads/odsInstanceCopy.json"
 (Get-Content $PSScriptRoot/payloads/odsInstanceCopy.json).Replace('%Password%', $env:POSTGRES_PASSWORD) | Set-Content $PSScriptRoot/payloads/odsInstanceCopy.json
+(Get-Content $PSScriptRoot/payloads/odsInstanceCopy.json).Replace('%Name%', "ods-$(New-Guid)") | Set-Content $PSScriptRoot/payloads/odsInstanceCopy.json
 
 $response = Invoke-AdminApi -access_token $access_token -filePath "$PSScriptRoot/payloads/odsInstanceCopy.json" -endpoint "odsInstances"
 if ($response.StatusCode -ne 201) {
