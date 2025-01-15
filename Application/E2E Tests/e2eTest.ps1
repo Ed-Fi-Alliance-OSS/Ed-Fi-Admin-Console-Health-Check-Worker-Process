@@ -52,10 +52,14 @@ $response = Invoke-AdminApi -access_token $access_token -filePath "$PSScriptRoot
 if ($response.StatusCode -ne 201) {
     Write-Error "Not able to create ods instance on Admin Api." -ErrorAction Stop
 }
+
+$odsInstanceId = $response.ResponseHeaders.location -replace '\D'
+
 Remove-Item -Path "$PSScriptRoot/payloads/odsInstanceCopy.json"
 
 Copy-Item -Path "$PSScriptRoot/payloads/application.json" -Destination "$PSScriptRoot/payloads/applicationCopy.json"
 (Get-Content $PSScriptRoot/payloads/applicationCopy.json).Replace('123456789', $vendorId) | Set-Content $PSScriptRoot/payloads/applicationCopy.json
+(Get-Content $PSScriptRoot/payloads/applicationCopy.json).Replace('987654321', $odsInstanceId) | Set-Content $PSScriptRoot/payloads/applicationCopy.json
 
 $response = Invoke-AdminApi -access_token $access_token -filePath "$PSScriptRoot/payloads/applicationCopy.json" -endpoint "applications"
 
