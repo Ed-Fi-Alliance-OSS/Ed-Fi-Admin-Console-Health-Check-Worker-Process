@@ -3,19 +3,25 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using System.Net.Http.Headers;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
-using System.Text;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 
 public interface IOdsApiClient
 {
-    Task<ApiResponse> OdsApiGet(string authenticationUrl, string clientId, string clientSecret, string odsEndpointUrl, string getInfo);
+    Task<ApiResponse> OdsApiGet(
+        string authenticationUrl,
+        string clientId,
+        string clientSecret,
+        string odsEndpointUrl,
+        string getInfo
+    );
 }
 
 public class OdsApiClient : IOdsApiClient
@@ -27,7 +33,12 @@ public class OdsApiClient : IOdsApiClient
 
     private string _accessToken;
 
-    public OdsApiClient(IAppHttpClient appHttpClient, ILogger logger, IOptions<AppSettings> options, ICommandArgs commandArgs)
+    public OdsApiClient(
+        IAppHttpClient appHttpClient,
+        ILogger logger,
+        IOptions<AppSettings> options,
+        ICommandArgs commandArgs
+    )
     {
         _appHttpClient = appHttpClient;
         _logger = logger;
@@ -36,7 +47,13 @@ public class OdsApiClient : IOdsApiClient
         _accessToken = string.Empty;
     }
 
-    public async Task<ApiResponse> OdsApiGet(string authenticationUrl, string clientId, string clientSecret, string odsEndpointUrl, string getInfo)
+    public async Task<ApiResponse> OdsApiGet(
+        string authenticationUrl,
+        string clientId,
+        string clientSecret,
+        string odsEndpointUrl,
+        string getInfo
+    )
     {
         ApiResponse response = new ApiResponse(HttpStatusCode.InternalServerError, string.Empty);
         await GetAccessToken(authenticationUrl, clientId, clientSecret);
@@ -47,7 +64,12 @@ public class OdsApiClient : IOdsApiClient
             var currentAttempt = 0;
             while (RetryAttempts > currentAttempt)
             {
-                response = await _appHttpClient.SendAsync(odsEndpointUrl, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", _accessToken));
+                response = await _appHttpClient.SendAsync(
+                    odsEndpointUrl,
+                    HttpMethod.Get,
+                    null as StringContent,
+                    new AuthenticationHeaderValue("bearer", _accessToken)
+                );
 
                 currentAttempt++;
 
@@ -65,18 +87,25 @@ public class OdsApiClient : IOdsApiClient
         {
             FormUrlEncodedContent content;
 
-            content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("Grant_type", "client_credentials")
-            });
+            content = new FormUrlEncodedContent(
+                new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("Grant_type", "client_credentials"),
+                }
+            );
 
             var encodedKeySecret = Encoding.ASCII.GetBytes($"{clientId}:{clientSecret}");
 
-            var apiResponse = await _appHttpClient.SendAsync(accessTokenUrl, HttpMethod.Post, content, new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encodedKeySecret)));
+            var apiResponse = await _appHttpClient.SendAsync(
+                accessTokenUrl,
+                HttpMethod.Post,
+                content,
+                new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encodedKeySecret))
+            );
 
             if (apiResponse.StatusCode == HttpStatusCode.OK)
             {
-                var jsonToken = JToken.Parse(apiResponse.Content);
+                dynamic jsonToken = JToken.Parse(apiResponse.Content);
                 _accessToken = jsonToken["access_token"].ToString();
             }
             else

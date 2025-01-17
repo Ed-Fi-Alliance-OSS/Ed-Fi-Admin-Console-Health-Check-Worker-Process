@@ -47,21 +47,18 @@ public class Program
         var cancellationTokenSource = new CancellationTokenSource();
 
         var assembly = Assembly.GetExecutingAssembly();
-        var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                           ?.InformationalVersion;
+        var informationalVersion = assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
 
-        var logger = builtHost.Services.GetService<ILogger<Program>>();
-        logger.LogInformation("{name} {version} Starting", assembly.GetName().Name, informationalVersion);
+        Log.Information("{name} {version} Starting", assembly.GetName().Name, informationalVersion);
 
         Log.Information("Starting host");
         await builtHost.StartAsync(cancellationTokenSource.Token);
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host
-            .CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration(ConfigureAppConfig)
-            .UseSerilog();
+        Host.CreateDefaultBuilder(args).ConfigureAppConfiguration(ConfigureAppConfig).UseSerilog();
 
     private static void ConfigureAppConfig(HostBuilderContext context, IConfigurationBuilder config)
     {
@@ -70,9 +67,10 @@ public class Program
         var env = context.HostingEnvironment;
         //config.Sources.Clear();
 
-        config.AddJsonFile(loggingConfigFile, optional: false)
-              .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-              .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        config
+            .AddJsonFile(loggingConfigFile, optional: false)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
         config.AddEnvironmentVariables();
     }

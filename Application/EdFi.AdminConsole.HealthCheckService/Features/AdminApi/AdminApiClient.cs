@@ -27,7 +27,12 @@ public class AdminApiClient : IAdminApiClient
     private readonly ICommandArgs _commandArgs;
     private string _accessToken;
 
-    public AdminApiClient(IAppHttpClient appHttpClient, ILogger logger, IOptions<AdminApiSettings> adminApiOptions, ICommandArgs commandArgs)
+    public AdminApiClient(
+        IAppHttpClient appHttpClient,
+        ILogger logger,
+        IOptions<AdminApiSettings> adminApiOptions,
+        ICommandArgs commandArgs
+    )
     {
         _appHttpClient = appHttpClient;
         _logger = logger;
@@ -48,7 +53,12 @@ public class AdminApiClient : IAdminApiClient
 
             while (RetryAttempts > currentAttempt)
             {
-                response = await _appHttpClient.SendAsync(_adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", _accessToken));
+                response = await _appHttpClient.SendAsync(
+                    _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI,
+                    HttpMethod.Get,
+                    null as StringContent,
+                    new AuthenticationHeaderValue("bearer", _accessToken)
+                );
 
                 currentAttempt++;
 
@@ -71,7 +81,12 @@ public class AdminApiClient : IAdminApiClient
         {
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            response = await _appHttpClient.SendAsync(_adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleHealthCheckURI, HttpMethod.Post, content, new AuthenticationHeaderValue("bearer", _accessToken));
+            response = await _appHttpClient.SendAsync(
+                _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleHealthCheckURI,
+                HttpMethod.Post,
+                content,
+                new AuthenticationHeaderValue("bearer", _accessToken)
+            );
 
             currentAttempt++;
 
@@ -86,21 +101,28 @@ public class AdminApiClient : IAdminApiClient
     {
         if (string.IsNullOrEmpty(_accessToken))
         {
-            FormUrlEncodedContent content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("client_id", _commandArgs.ClientId),
-                new KeyValuePair<string, string>("client_secret", _commandArgs.ClientSecret),
-                new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                new KeyValuePair<string, string>("scope", "edfi_admin_api/full_access")
-            });
+            FormUrlEncodedContent content = new FormUrlEncodedContent(
+                new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", _commandArgs.ClientId),
+                    new KeyValuePair<string, string>("client_secret", _commandArgs.ClientSecret),
+                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                    new KeyValuePair<string, string>("scope", "edfi_admin_api/full_access"),
+                }
+            );
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-            var apiResponse = await _appHttpClient.SendAsync(_adminApiOptions.AccessTokenUrl, HttpMethod.Post, content, null);
+            var apiResponse = await _appHttpClient.SendAsync(
+                _adminApiOptions.AccessTokenUrl,
+                HttpMethod.Post,
+                content,
+                null
+            );
 
             if (apiResponse.StatusCode == HttpStatusCode.OK)
             {
-                var jsonToken = JToken.Parse(apiResponse.Content);
+                dynamic jsonToken = JToken.Parse(apiResponse.Content);
                 _accessToken = jsonToken["access_token"].ToString();
             }
             else

@@ -24,7 +24,13 @@ public class Application : IApplication, IHostedService
     private readonly IAdminApiCaller _adminApiCaller;
     private readonly IOdsApiCaller _odsApiCaller;
 
-    public Application(AdminApiClient myService, IConfiguration configuration, ILogger logger, IAdminApiCaller adminApiCaller, IOdsApiCaller odsApiCaller)
+    public Application(
+        AdminApiClient myService,
+        IConfiguration configuration,
+        ILogger logger,
+        IAdminApiCaller adminApiCaller,
+        IOdsApiCaller odsApiCaller
+    )
     {
         _configuration = configuration;
         _logger = logger;
@@ -46,7 +52,9 @@ public class Application : IApplication, IHostedService
             foreach (var instance in instances)
             {
                 /// Step 2. For each instance, Get the HealthCheck data from ODS API
-                _logger.LogInformation($"Processing instance with name: {instance.InstanceName ?? "<No Name>"}");
+                _logger.LogInformation(
+                    $"Processing instance with name: {instance.InstanceName ?? "<No Name>"}"
+                );
 
                 if (InstanceValidator.IsInstanceValid(_logger, instance))
                 {
@@ -73,7 +81,9 @@ public class Application : IApplication, IHostedService
                     }
                     else
                     {
-                        _logger.LogInformation($"No HealthCheck data has been collected for instance with name: {instance.InstanceName}");
+                        _logger.LogInformation(
+                            $"No HealthCheck data has been collected for instance with name: {instance.InstanceName}"
+                        );
                     }
                 }
             }
