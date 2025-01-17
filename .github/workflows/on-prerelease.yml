@@ -54,6 +54,11 @@ jobs:
           # SemVer
           "health-worker-semver=$($healthWorkerVersion -Replace $apiPrefix)" >> $env:GITHUB_OUTPUT
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # v3.0.3
+        with:
+          dotnet-version: 8.0.x
+
       - name: Publish .NET Assemblies
         run: |
           $healthWorkerVersion = "${{ steps.versions.outputs.health-worker-semver }}"

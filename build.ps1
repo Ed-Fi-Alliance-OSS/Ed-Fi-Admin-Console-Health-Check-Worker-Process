@@ -51,7 +51,18 @@ param(
 
     # Only required with local builds and testing.
     [switch]
-    $IsLocalBuild
+    $IsLocalBuild,
+
+    # API key for accessing the feed above. Only required with with the Push
+    # command.
+    [string]
+    $NuGetApiKey,
+
+    # Full path of a package file to push to the NuGet feed. Optional, only
+    # applies with the Push command. If not set, then the script looks for a
+    # NuGet package corresponding to the provided $DMSVersion and $BuildCounter.
+    [string]
+    $PackageFile
 )
 
 $solutionRoot = "$PSScriptRoot/Application"
@@ -186,7 +197,7 @@ function PublishHealthWorker {
     Invoke-Execute {
         $projectRoot = "$solutionRoot/$projectName"
         $outputPath = "$projectRoot/publish"
-        dotnet publish $projectRoot -c $Configuration -o $outputPath --nologo
+        dotnet publish $defaultSolution -c $Configuration -o $outputPath --nologo --no-build
     }
 }
 
@@ -244,6 +255,7 @@ Invoke-Main {
         Clean { Invoke-Clean }
         Build { Invoke-Build }
         BuildAndPublish {
+            Invoke-SetAssemblyInfo
             Invoke-Build
             Invoke-Publish
          }
