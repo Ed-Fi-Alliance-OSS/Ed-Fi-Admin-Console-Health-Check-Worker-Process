@@ -82,9 +82,6 @@ function RunNuGetPack {
 
         [string]
         $PackageVersion,
-
-        [string]
-        $nuspecPath
     )
 
     # NU5100 is the warning about DLLs outside of a "lib" folder. We're
@@ -92,7 +89,7 @@ function RunNuGetPack {
     # warning.
     # NU5110 is the warning about ps1 files outside the "tools" folder
     # NU5111 is a warning about an unrecognized ps1 filename
-    dotnet pack $ProjectPath --output $PSScriptRoot -p:NuspecFile=$nuspecPath -p:NuspecProperties="version=$PackageVersion" /p:NoWarn='"NU5100;NU5110;NU5111"'
+    dotnet pack $ProjectPath --output $PSScriptRoot --no-restore
 }
 
 function DotNetClean {
@@ -128,9 +125,7 @@ function SetHealthWorkerAssemblyInfo {
 function BuildPackage {
     $projectRoot = "$solutionRoot/$projectName"
     $projectPath = "$projectRoot/$projectName.csproj"
-    $nugetSpecPath = "$projectRoot/publish/$projectName.nuspec"
-
-    RunNuGetPack -ProjectPath $projectPath -PackageVersion $HealthWorkerVersion $nugetSpecPath
+    RunNuGetPack -ProjectPath $projectPath -PackageVersion $HealthWorkerVersion
 }
 
 function Compile {
