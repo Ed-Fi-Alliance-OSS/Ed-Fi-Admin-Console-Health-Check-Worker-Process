@@ -81,7 +81,7 @@ function RunNuGetPack {
         $ProjectPath,
 
         [string]
-        $PackageVersion,
+        $PackageVersion
     )
 
     # NU5100 is the warning about DLLs outside of a "lib" folder. We're
