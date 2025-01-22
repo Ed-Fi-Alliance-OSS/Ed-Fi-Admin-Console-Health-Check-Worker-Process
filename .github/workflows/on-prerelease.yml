@@ -14,7 +14,7 @@ env:
   ARTIFACTS_FEED_URL: ${{ vars.AZURE_ARTIFACTS_FEED_URL }}
   VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint": "${{ vars.AZURE_ARTIFACTS_FEED_URL }}","password": "${{ secrets.AZURE_ARTIFACTS_PERSONAL_ACCESS_TOKEN }}"}]}'
   MANIFEST_FILE: "_manifest/spdx_2.2/manifest.spdx.json"
-  PACKAGE_NAME: "AdminConsoleHealthCheckWorker"
+  PACKAGE_NAME: "AdminConsole.HealthCheckService"
   IMAGE_NAME: ${{ vars.IMAGE_NAME }}
   DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
@@ -230,7 +230,7 @@ jobs:
     name: Publish to Docker Hub
     runs-on: ubuntu-latest
     needs:
-      - publish-package
+      - pack
     steps:
       - name: Wait 20s
         # Give Azure Artifacts caching a moment to catch up
