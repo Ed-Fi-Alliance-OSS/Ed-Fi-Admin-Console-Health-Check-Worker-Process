@@ -76,6 +76,7 @@ public class Given_an_instance_returned_from_AdminApi
         }
     }
 
+
     [TestFixture]
     public class When_it_does_not_have_ClientId : Given_an_instance_returned_from_AdminApi
     {

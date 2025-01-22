@@ -3,11 +3,13 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
+using System.Collections.Generic;
 using System.Text;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 
@@ -38,16 +40,32 @@ public class AdminApiCaller : IAdminApiCaller
         {
             var instancesEndpoint = _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI;
             var response = await _adminApiClient.AdminApiGet("Getting instances from Admin API - Admin Console extension");
+            var instances = new List<AdminApiInstance>();
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK && !string.IsNullOrEmpty(response.Content))
             {
-                var instances = JsonConvert.DeserializeObject<IEnumerable<AdminApiInstance>>(response.Content);
-                if (instances != null)
+                var instancesJObject = JsonConvert.DeserializeObject<IEnumerable<JObject>>(response.Content);
+                if (instancesJObject != null)
                 {
-                    return instances.Select(i => i.Document) ?? Enumerable.Empty<AdminApiInstanceDocument>();
+                    foreach (var jObjectItem in instancesJObject)
+                    {
+                        try
+                        {
+                            var instance = JsonConvert.DeserializeObject<AdminApiInstance>(jObjectItem.ToString());
+                            if (instance != null)
+                            {
+                                instances.Add(instance);
+                                //return instances.Select(i => i.Document) ?? Enumerable.Empty<AdminApiInstanceDocument>();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Not able to process instance.");
+                        }
+                    }
                 }
             }
-            return new List<AdminApiInstanceDocument>();
+            return instances.Select(i => i.Document) ?? Enumerable.Empty<AdminApiInstanceDocument>();
         }
         else
         {
