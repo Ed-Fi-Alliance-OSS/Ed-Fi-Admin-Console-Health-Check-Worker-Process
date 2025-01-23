@@ -283,11 +283,11 @@ jobs:
       - name: Build and push Health Check worker image
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09  # v5.0.0
         with:
-          context: "{{defaultContext}}:Docker"
+          context: "{{defaultContext}}:/"
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:pre
           cache-to: type=inline
           build-args: VERSION=${{ steps.prepare-tags.outputs.VERSION }}
-          file: Dockerfile
+          file: Docker/Dockerfile
           tags: ${{ steps.prepare-tags.outputs.WORKER_TAGS }}
           labels: ${{ steps.metaapi.outputs.labels }}
           push: true
@@ -299,10 +299,10 @@ jobs:
       actions: read
       id-token: write
       contents: write
-    uses: Ed-Fi-Alliance-OSS/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@main
+    uses: Ed-Fi-Alliance-OSS/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
     with:
       base64-subjects: ${{ needs.pack.outputs.hash-code }}
-      attestation-name: HealhtCheckService.intoto.jsonl
+      provenance-name: HealhtCheckService.intoto.jsonl
       upload-assets: true
       # TODO: remove this after this issue is resolved: https://github.com/slsa-framework/slsa-github-generator/issues/876
       compile-generator: true
