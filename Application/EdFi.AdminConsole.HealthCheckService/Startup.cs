@@ -26,13 +26,14 @@ public static class Startup
         services.Configure<AdminApiSettings>(configuration.GetSection("AdminApiSettings"));
         services.Configure<OdsApiSettings>(configuration.GetSection("OdsApiSettings"));
 
-        services.AddSingleton<ILogger>();
+#pragma warning disable CS8603 // Possible null reference return.
+        services.AddSingleton<ILogger>(sp => sp.GetService<ILogger<Application>>());
+#pragma warning restore CS8603 // Possible null reference return.
 
         services.AddSingleton<IAppSettingsOdsApiEndpoints, AppSettingsOdsApiEndpoints>();
         services.AddSingleton<ICommandArgs, CommandArgs>();
 
         services.AddTransient<IHttpRequestMessageBuilder, HttpRequestMessageBuilder>();
-        services.AddTransient<IOdsResourceEndpointUrlBuilder, OdsResourceEndpointUrlBuilder>();
 
         services.AddTransient<IAdminApiClient, AdminApiClient>();
         services.AddTransient<IOdsApiClient, OdsApiClient>();
@@ -42,16 +43,12 @@ public static class Startup
 
         services.AddTransient<IHostedService, Application>();
 
-        //services.AddTransient<IAdminApiClientNew, AdminApiClient>();
-
-        //services.AddHttpClient<IAppHttpClient, AppHttpClient>();
-
         services
             .AddHttpClient<IAppHttpClient, AppHttpClient>(
                 "AppHttpClient",
                 x =>
                 {
-                    x.Timeout = TimeSpan.FromSeconds(5);
+                    x.Timeout = TimeSpan.FromSeconds(500);
                 }
             )
             .ConfigurePrimaryHttpMessageHandler(() =>

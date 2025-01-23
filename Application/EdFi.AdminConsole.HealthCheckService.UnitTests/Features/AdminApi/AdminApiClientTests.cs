@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using EdFi.AdminConsole.HealthCheckService.Features;
 using EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
+using EdFi.AdminConsole.HealthCheckService.Helpers;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
 using EdFi.Ods.AdminApi.HealthCheckService.UnitTests;
 using FakeItEasy;
@@ -39,7 +40,7 @@ public class Given_an_admin_api
         public async Task should_return_successfully()
         {
             var httpClient = A.Fake<IAppHttpClient>();
-            var instancesUrl = Testing.GetAdminApiSettings().Value.ApiUrl + Testing.GetAdminApiSettings().Value.AdminConsoleInstancesURI;
+            var instancesUrl = Testing.GetAdminApiSettings().Value.ApiUrl + Testing.GetAdminApiSettings().Value.AdminConsoleInstancesURI + Constants.CompletedInstances;
 
             A.CallTo(() => httpClient.SendAsync(Testing.GetAdminApiSettings().Value.AccessTokenUrl, HttpMethod.Post, A<FormUrlEncodedContent>.Ignored, null))
                 .Returns(new ApiResponse(HttpStatusCode.OK, "{ \"access_token\": \"123\"}"));

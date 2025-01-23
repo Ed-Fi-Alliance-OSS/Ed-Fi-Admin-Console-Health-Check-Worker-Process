@@ -12,7 +12,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 
 public interface IOdsApiCaller
 {
-    Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminApiInstanceDocument instance);
+    Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminApiInstance instance);
 }
 
 public class OdsApiCaller : IOdsApiCaller
@@ -21,29 +21,27 @@ public class OdsApiCaller : IOdsApiCaller
     private IOdsApiClient _odsApiClient;
     private IAppSettingsOdsApiEndpoints _appSettingsOdsApiEndpoints;
     private readonly ICommandArgs _commandArgs;
-    private IOdsResourceEndpointUrlBuilder _odsResourceEndpointUrlBuilder;
+    //private IOdsResourceEndpointUrlBuilder _odsResourceEndpointUrlBuilder;
 
-    public OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints, ICommandArgs commandArgs, IOdsResourceEndpointUrlBuilder odsResourceEndpointUrlBuilder)
+    public OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints, ICommandArgs commandArgs/*, IOdsResourceEndpointUrlBuilder odsResourceEndpointUrlBuilder*/)
     {
         _logger = logger;
         _odsApiClient = odsApiClient;
         _appSettingsOdsApiEndpoints = appSettingsOdsApiEndpoints;
         _commandArgs = commandArgs;
-        _odsResourceEndpointUrlBuilder = odsResourceEndpointUrlBuilder;
+        //_odsResourceEndpointUrlBuilder = odsResourceEndpointUrlBuilder;
     }
 
-    public async Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminApiInstanceDocument instance)
+    public async Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminApiInstance instance)
     {
         var tasks = new List<Task<OdsApiEndpointNameCount>>();
 
         foreach (var appSettingsOdsApiEndpoint in _appSettingsOdsApiEndpoints)
         {
-            var odsResourceEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(instance.BaseUrl, $"{instance.ResourcesUrl}{appSettingsOdsApiEndpoint}");
-
-            var odsAuthEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsAuthEndpointUrl(instance.BaseUrl, instance.AuthenticationUrl);
+            var odsResourceEndpointUrl = $"{instance.ResourceUrl}/{appSettingsOdsApiEndpoint}{Constants.OdsApiQueryParams}";
 
             tasks.Add(Task.Run(() => GetCountPerEndpointAsync(
-                appSettingsOdsApiEndpoint, odsAuthEndpointUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));
+                appSettingsOdsApiEndpoint, instance.OauthUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));
         }
 
         return (await Task.WhenAll(tasks)).ToList();

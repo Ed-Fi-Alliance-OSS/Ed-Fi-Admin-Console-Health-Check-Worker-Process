@@ -10,7 +10,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Helpers;
 
 public static class InstanceValidator
 {
-    public static bool IsInstanceValid(ILogger logger, AdminApiInstanceDocument instance)
+    public static bool IsInstanceValid(ILogger logger, AdminApiInstance instance)
     {
         var messages = new List<string>();
 
@@ -18,13 +18,10 @@ public static class InstanceValidator
             messages.Add("instance cannot be empty.");
         else
         {
-            if (string.IsNullOrEmpty(instance.BaseUrl))
-                messages.Add("BaseUrl is required.");
-
-            if (string.IsNullOrEmpty(instance.AuthenticationUrl))
+            if (string.IsNullOrEmpty(instance.OauthUrl))
                 messages.Add("AuthenticationUrl is required.");
 
-            if (string.IsNullOrEmpty(instance.ResourcesUrl))
+            if (string.IsNullOrEmpty(instance.ResourceUrl))
                 messages.Add("ResourcesUrl is required.");
 
             if (string.IsNullOrEmpty(instance.ClientId))

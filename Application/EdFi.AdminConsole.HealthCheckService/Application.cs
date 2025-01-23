@@ -71,7 +71,6 @@ public class Application : IApplication, IHostedService
                         {
                             TenantId = instance.TenantId,
                             InstanceId = instance.InstanceId,
-                            EdOrgId = instance.EdOrgId,
                             Document = healthCheckDocument.ToString(),
                         };
 

@@ -5,6 +5,7 @@
 
 using System.Net;
 using System.Net.Http.Headers;
+using EdFi.AdminConsole.HealthCheckService.Helpers;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -54,7 +55,7 @@ public class AdminApiClient : IAdminApiClient
             while (RetryAttempts > currentAttempt)
             {
                 response = await _appHttpClient.SendAsync(
-                    _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI,
+                    _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI + Constants.CompletedInstances,
                     HttpMethod.Get,
                     null as StringContent,
                     new AuthenticationHeaderValue("bearer", _accessToken)

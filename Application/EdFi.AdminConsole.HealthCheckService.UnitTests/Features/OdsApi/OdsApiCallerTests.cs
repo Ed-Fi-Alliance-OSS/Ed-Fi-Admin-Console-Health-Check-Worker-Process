@@ -23,7 +23,6 @@ public class Given_an_ods_api
     {
         private ILogger<Given_an_ods_api> _logger;
         private IOdsApiClient _odsApiClient;
-        private IOdsResourceEndpointUrlBuilder _odsResourceEndpointUrlBuilder;
         private IOdsApiCaller _odsApiCaller;
 
         [SetUp]
@@ -38,17 +37,16 @@ public class Given_an_ods_api
             _logger = A.Fake<ILogger<Given_an_ods_api>>();
 
             _odsApiClient = A.Fake<IOdsApiClient>();
-            _odsResourceEndpointUrlBuilder = A.Fake<IOdsResourceEndpointUrlBuilder>();
 
             var adminApiInstance = Testing.AdminApiInstances.First();
 
-            var httpResponse1 = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            var httpResponse1 = new HttpResponseMessage(HttpStatusCode.OK);
             httpResponse1.Headers.Add(Constants.TotalCountHeader, "3");
 
-            var httpResponse2 = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            var httpResponse2 = new HttpResponseMessage(HttpStatusCode.OK);
             httpResponse2.Headers.Add(Constants.TotalCountHeader, "8");
 
-            var httpResponse3 = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            var httpResponse3 = new HttpResponseMessage(HttpStatusCode.OK);
             httpResponse3.Headers.Add(Constants.TotalCountHeader, "5");
 
             A.CallTo(() => _odsApiClient.OdsApiGet(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, "http://www.myserver.com/data/v3/ed-fi/firstEndPoint?offset=0&limit=0&totalCount=true", "Get HealthCheck data from Ods Api"))
@@ -60,16 +58,7 @@ public class Given_an_ods_api
             A.CallTo(() => _odsApiClient.OdsApiGet(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, "http://www.myserver.com/data/v3/ed-fi/thirdEndPoint?offset=0&limit=0&totalCount=true", "Get HealthCheck data from Ods Api"))
                 .Returns(new ApiResponse(HttpStatusCode.OK, string.Empty, httpResponse3.Headers));
 
-            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{adminApiInstance.ResourcesUrl}firstEndPoint"))
-                .Returns($"{adminApiInstance.BaseUrl}{adminApiInstance.ResourcesUrl}firstEndPoint{Constants.OdsApiQueryParams}");
-
-            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{adminApiInstance.ResourcesUrl}secondEndpoint"))
-                .Returns($"{adminApiInstance.BaseUrl}{adminApiInstance.ResourcesUrl}secondEndpoint{Constants.OdsApiQueryParams}");
-
-            A.CallTo(() => _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(adminApiInstance.BaseUrl, $"{adminApiInstance.ResourcesUrl}thirdEndPoint"))
-                .Returns($"{adminApiInstance.BaseUrl}{adminApiInstance.ResourcesUrl}thirdEndPoint{Constants.OdsApiQueryParams}");
-
-            _odsApiCaller = new OdsApiCaller(_logger, _odsApiClient, new AppSettingsOdsApiEndpoints(Testing.GetOdsApiSettings()), commandArgs, _odsResourceEndpointUrlBuilder);
+            _odsApiCaller = new OdsApiCaller(_logger, _odsApiClient, new AppSettingsOdsApiEndpoints(Testing.GetOdsApiSettings()), commandArgs);
         }
 
         [Test]

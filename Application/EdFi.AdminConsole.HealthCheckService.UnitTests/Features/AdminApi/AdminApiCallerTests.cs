@@ -48,22 +48,24 @@ public class Given_an_admin_api
             instances.Count().ShouldBe(2);
 
             instances.First().InstanceId.ShouldBe(1);
+            instances.First().OdsInstanceId.ShouldBe(1);
             instances.First().TenantId.ShouldBe(1);
             instances.First().InstanceName.ShouldBe("instance 1");
             instances.First().ClientId.ShouldBe("one client");
             instances.First().ClientSecret.ShouldBe("one secret");
-            instances.First().BaseUrl.ShouldBe("http://www.myserver.com");
-            instances.First().ResourcesUrl.ShouldBe("/data/v3/ed-fi/");
-            instances.First().AuthenticationUrl.ShouldBe("/connect/token");
+            instances.First().ResourceUrl.ShouldBe("http://www.myserver.com/data/v3");
+            instances.First().OauthUrl.ShouldBe("http://www.myserver.com/connect/token");
+            instances.First().Status.ShouldBe("Completed");
 
             instances.ElementAt(1).InstanceId.ShouldBe(2);
+            instances.ElementAt(1).OdsInstanceId.ShouldBe(2);
             instances.ElementAt(1).TenantId.ShouldBe(2);
             instances.ElementAt(1).InstanceName.ShouldBe("instance 2");
             instances.ElementAt(1).ClientId.ShouldBe("another client");
             instances.ElementAt(1).ClientSecret.ShouldBe("another secret");
-            instances.ElementAt(1).BaseUrl.ShouldBe("http://www.otherserver.com");
-            instances.ElementAt(1).ResourcesUrl.ShouldBe("/data/v3/ed-fi/");
-            instances.ElementAt(1).AuthenticationUrl.ShouldBe("/connect/token");
+            instances.ElementAt(1).ResourceUrl.ShouldBe("http://www.myserver.com/data/v3");
+            instances.ElementAt(1).OauthUrl.ShouldBe("http://www.myserver.com/connect/token");
+            instances.First().Status.ShouldBe("Completed");
         }
     }
 }

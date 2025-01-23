@@ -15,7 +15,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 
 public interface IAdminApiCaller
 {
-    Task<IEnumerable<AdminApiInstanceDocument>> GetInstancesAsync();
+    Task<IEnumerable<AdminApiInstance>> GetInstancesAsync();
     Task PostHealCheckAsync(AdminApiHealthCheckPost endpoints);
 }
 
@@ -34,11 +34,11 @@ public class AdminApiCaller : IAdminApiCaller
         _commandArgs = commandArgs;
     }
 
-    public async Task<IEnumerable<AdminApiInstanceDocument>> GetInstancesAsync()
+    public async Task<IEnumerable<AdminApiInstance>> GetInstancesAsync()
     {
         if (AdminApiConnectioDataValidator.IsValid(_logger, _adminApiOptions, _commandArgs))
         {
-            var instancesEndpoint = _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI;
+            var instancesEndpoint = _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI + Constants.CompletedInstances;
             var response = await _adminApiClient.AdminApiGet("Getting instances from Admin API - Admin Console extension");
             var instances = new List<AdminApiInstance>();
 
@@ -53,24 +53,21 @@ public class AdminApiCaller : IAdminApiCaller
                         {
                             var instance = JsonConvert.DeserializeObject<AdminApiInstance>(jObjectItem.ToString());
                             if (instance != null)
-                            {
                                 instances.Add(instance);
-                                //return instances.Select(i => i.Document) ?? Enumerable.Empty<AdminApiInstanceDocument>();
-                            }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Not able to process instance.");
+                            _logger.LogError(ex, $"Not able to process instance.");
                         }
                     }
                 }
             }
-            return instances.Select(i => i.Document) ?? Enumerable.Empty<AdminApiInstanceDocument>();
+            return instances;
         }
         else
         {
             _logger.LogError("AdminApi Settings has not been set properly.");
-            return new List<AdminApiInstanceDocument>();
+            return new List<AdminApiInstance>();
         }
     }
 
@@ -88,19 +85,5 @@ public class AdminApiCaller : IAdminApiCaller
             _logger.LogError($"Not able to post HealthCheck data to Ods Api. Tenant Id: {instanceHealthCheckData.TenantId}.");
             _logger.LogError($"Status Code returned is: {response.StatusCode}.");
         }
-    }
-
-    private bool IsAdminApiSettingsValid()
-    {
-        if (string.IsNullOrEmpty(_adminApiOptions.AccessTokenUrl)
-            || string.IsNullOrEmpty(_adminApiOptions.ApiUrl)
-            || string.IsNullOrEmpty(_adminApiOptions.AdminConsoleInstancesURI)
-            || string.IsNullOrEmpty(_adminApiOptions.AdminConsoleHealthCheckURI)
-            || string.IsNullOrEmpty(_commandArgs.ClientId)
-            || string.IsNullOrEmpty(_commandArgs.ClientSecret)
-            )
-        { return false; }
-        else
-        { return true; }
     }
 }

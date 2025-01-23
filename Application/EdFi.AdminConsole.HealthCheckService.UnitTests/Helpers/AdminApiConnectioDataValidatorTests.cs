@@ -98,13 +98,14 @@ public class Given_a_set_of_commans_arguments_provided
 {
     public class When_it_is_a_single_tenant : Given_a_set_of_commans_arguments_provided
     {
-        private Microsoft.Extensions.Configuration.IConfiguration _configuration;
-        private CommandArgs _commandArgs;
+        public required Microsoft.Extensions.Configuration.IConfiguration _configuration;
+        public required CommandArgs _commandArgs;
         private ILogger<Given_AdminApiSettings_provided> _logger;
         private IAdminApiSettings _adminApiSettings;
 
+
         [SetUp]
-        public void SetUp()
+        public void BaseSetUp()
         {
             _logger = A.Fake<ILogger<Given_AdminApiSettings_provided>>();
             _adminApiSettings = Testing.GetAdminApiSettings().Value;
@@ -172,13 +173,13 @@ public class Given_a_set_of_commans_arguments_provided
     }
     public class When_it_is_a_multi_tenant : Given_a_set_of_commans_arguments_provided
     {
-        private Microsoft.Extensions.Configuration.IConfiguration _configuration;
-        private CommandArgs _commandArgs;
+        public required Microsoft.Extensions.Configuration.IConfiguration _configuration;
+        public required CommandArgs _commandArgs;
         private ILogger<Given_AdminApiSettings_provided> _logger;
         private IAdminApiSettings _adminApiSettings;
 
         [SetUp]
-        public void SetUp()
+        public void BaseSetUp()
         {
             _logger = A.Fake<ILogger<Given_AdminApiSettings_provided>>();
             _adminApiSettings = Testing.GetAdminApiSettings().Value;

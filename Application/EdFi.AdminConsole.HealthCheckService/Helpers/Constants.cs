@@ -12,5 +12,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Helpers
         public const string TotalCountHeader = "total-count";
 
         public const string TenantHeader = "tenant";
+
+        public const string CompletedInstances = "?status=Completed";
     }
 }

@@ -7,22 +7,13 @@ namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 
 public class AdminApiInstance
 {
-    public int DocId { get; set; } = 0;
     public int TenantId { get; set; } = 0;
     public int InstanceId { get; set; } = 0;
-    public int EdOrgId { get; set; } = 0;
-    public AdminApiInstanceDocument Document { get; set; } = new AdminApiInstanceDocument();
-}
-
-public class AdminApiInstanceDocument
-{
-    public int TenantId { get; set; } = 0;
-    public int InstanceId { get; set; } = 0;
-    public int EdOrgId { get; set; } = 0;
+    public int OdsInstanceId { get; set; } = 0;
     public string InstanceName { get; set; } = string.Empty;
     public string ClientId { get; set; } = string.Empty;
     public string ClientSecret { get; set; } = string.Empty;
-    public string BaseUrl { get; set; } = string.Empty;
-    public string ResourcesUrl { get; set; } = string.Empty;
-    public string AuthenticationUrl { get; set; } = string.Empty;
+    public string ResourceUrl { get; set; } = string.Empty;
+    public string OauthUrl { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
 }

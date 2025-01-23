@@ -19,7 +19,6 @@ public class Given_A_Set_Of_Command_Args
     [TestFixture]
     public class When_it_has_been_set_with_single_tenant : Given_A_Set_Of_Command_Args
     {
-        private ILogger<When_it_has_been_set_with_single_tenant> _logger;
         private IConfiguration _configuration;
 
         [SetUp]
@@ -45,7 +44,6 @@ public class Given_A_Set_Of_Command_Args
     [TestFixture]
     public class When_it_has_been_set_with_multi_tenant : Given_A_Set_Of_Command_Args
     {
-        private ILogger<When_it_has_been_set_with_multi_tenant> _logger;
         private IConfiguration _configuration;
 
         [SetUp]
