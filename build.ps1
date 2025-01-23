@@ -17,13 +17,13 @@
         * UnitTest: executes NUnit tests in projects named `*.UnitTests`, which
           do not connect to a database.
     .EXAMPLE
-        .\build-dms.ps1 build -Configuration Release -Version "2.0" -BuildCounter 45
+        .\build.ps1 build -Configuration Release -Version "2.0" -BuildCounter 45
 
         Overrides the default build configuration (Debug) to build in release
         mode with assembly version 2.0.45.
 
     .EXAMPLE
-        .\build-dms.ps1 unittest
+        .\build.ps1 unittest
 
         Output: test results displayed in the console and saved to XML files.
 #>
@@ -60,7 +60,7 @@ param(
 
     # Full path of a package file to push to the NuGet feed. Optional, only
     # applies with the Push command. If not set, then the script looks for a
-    # NuGet package corresponding to the provided $DMSVersion and $BuildCounter.
+    # NuGet package corresponding to the provided $HealthWorkerVersion and $BuildCounter.
     [string]
     $PackageFile
 )
@@ -145,7 +145,7 @@ function PushPackage {
         }
 
         if (-not $PackageFile) {
-            $PackageFile = "$PSScriptRoot/$packageName.$DMSVersion.nupkg"
+            $PackageFile = "$PSScriptRoot/$packageName.$HealthWorkerVersion.nupkg"
         }
 
         if ($DryRun) {
