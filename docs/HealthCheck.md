@@ -91,13 +91,15 @@ The data required is the following.
 |Setting|Description|
 |---|---|
 |TenantId|Tenant identifier|
+|TenantName|Tenant Name|
 |InstanceId|Instance identifier|
+|OdsInstanceId|ODS Instance identifier|
 |InstanceName|Instance name|
-|BaseUrl|Example: https://api.ed-fi.org/v7.1/api|
-|ResourcesUrl|Example: /data/v3/ed-fi/|
-|AuthenticationUrl|Example: /oauth/token/|
+|ResourceUrl|Example: https://api.ed-fi.org/v7.1/api/data/v3|
+|OauthUrl|Example: https://api.ed-fi.org/v7.1/api/oauth/token|
 |ClientId|`ClientId`|
 |ClientSecret|`ClientSecret`|
+|Status|Instance status|
 
 ## Multitenancy mode
 

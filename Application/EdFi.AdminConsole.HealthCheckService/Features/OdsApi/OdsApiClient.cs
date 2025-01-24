@@ -29,21 +29,18 @@ public class OdsApiClient : IOdsApiClient
     private readonly IAppHttpClient _appHttpClient;
     protected readonly ILogger _logger;
     protected readonly AppSettings _options;
-    private readonly ICommandArgs _commandArgs;
 
     private string _accessToken;
 
     public OdsApiClient(
         IAppHttpClient appHttpClient,
         ILogger logger,
-        IOptions<AppSettings> options,
-        ICommandArgs commandArgs
+        IOptions<AppSettings> options
     )
     {
         _appHttpClient = appHttpClient;
         _logger = logger;
         _options = options.Value;
-        _commandArgs = commandArgs;
         _accessToken = string.Empty;
     }
 

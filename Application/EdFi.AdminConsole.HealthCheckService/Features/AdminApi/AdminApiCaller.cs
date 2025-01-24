@@ -3,26 +3,25 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using System.Collections.Generic;
-using System.Text;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 
 public interface IAdminApiCaller
 {
     Task<IEnumerable<AdminApiInstance>> GetInstancesAsync();
-    Task PostHealCheckAsync(AdminApiHealthCheckPost endpoints);
+    Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData);
 }
 
 public class AdminApiCaller : IAdminApiCaller
 {
     private readonly ILogger _logger;
-    private IAdminApiClient _adminApiClient;
+    private readonly IAdminApiClient _adminApiClient;
     private readonly IAdminApiSettings _adminApiOptions;
     private readonly ICommandArgs _commandArgs;
 
@@ -38,7 +37,6 @@ public class AdminApiCaller : IAdminApiCaller
     {
         if (AdminApiConnectioDataValidator.IsValid(_logger, _adminApiOptions, _commandArgs))
         {
-            var instancesEndpoint = _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI + Constants.CompletedInstances;
             var response = await _adminApiClient.AdminApiGet("Getting instances from Admin API - Admin Console extension");
             var instances = new List<AdminApiInstance>();
 
@@ -73,8 +71,6 @@ public class AdminApiCaller : IAdminApiCaller
 
     public async Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData)
     {
-        var healthCheckEndpoint = _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleHealthCheckURI;
-
         var instanceHealthCheckDataJson = System.Text.Json.JsonSerializer.Serialize(instanceHealthCheckData);
         var instanceHealthCheckDataContent = new StringContent(instanceHealthCheckDataJson, Encoding.UTF8, "application/json");
 
@@ -82,8 +78,8 @@ public class AdminApiCaller : IAdminApiCaller
 
         if (response.StatusCode != System.Net.HttpStatusCode.Created)
         {
-            _logger.LogError($"Not able to post HealthCheck data to Ods Api. Tenant Id: {instanceHealthCheckData.TenantId}.");
-            _logger.LogError($"Status Code returned is: {response.StatusCode}.");
+            _logger.LogError("Not able to post HealthCheck data to Ods Api. Tenant Id: {TenantId}.", instanceHealthCheckData.TenantId);
+            _logger.LogError("Status Code returned is: {StatusCode}.", response.StatusCode);
         }
     }
 }

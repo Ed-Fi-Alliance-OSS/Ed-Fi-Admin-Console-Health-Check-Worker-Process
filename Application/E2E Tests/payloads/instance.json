@@ -9,7 +9,7 @@
         "clientId": "%key%",
         "clientSecret": "%secret%",
         "baseUrl": "http://host.docker.internal:8001",
-        "resourcesUrl":"/data/v3/ed-fi/",
+        "resourceUrl":"/data/v3/ed-fi/",
         "authenticationUrl":"/oauth/token/"
     }
 }

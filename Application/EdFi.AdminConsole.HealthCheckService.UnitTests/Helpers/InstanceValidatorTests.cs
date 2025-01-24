@@ -53,7 +53,7 @@ public class Given_an_instance_returned_from_AdminApi
     }
 
     [TestFixture]
-    public class When_it_does_not_have_ResourcesUrl : Given_an_instance_returned_from_AdminApi
+    public class When_it_does_not_have_ResourceUrl : Given_an_instance_returned_from_AdminApi
     {
 
         [Test]

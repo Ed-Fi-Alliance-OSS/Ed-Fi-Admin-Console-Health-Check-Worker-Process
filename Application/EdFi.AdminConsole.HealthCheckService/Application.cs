@@ -6,7 +6,6 @@
 using EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 using EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -19,20 +18,17 @@ public interface IApplication
 
 public class Application : IApplication, IHostedService
 {
-    private IConfiguration _configuration;
     private readonly ILogger _logger;
     private readonly IAdminApiCaller _adminApiCaller;
     private readonly IOdsApiCaller _odsApiCaller;
 
     public Application(
         AdminApiClient myService,
-        IConfiguration configuration,
         ILogger logger,
         IAdminApiCaller adminApiCaller,
         IOdsApiCaller odsApiCaller
     )
     {
-        _configuration = configuration;
         _logger = logger;
         _adminApiCaller = adminApiCaller;
         _odsApiCaller = odsApiCaller;
@@ -43,7 +39,7 @@ public class Application : IApplication, IHostedService
         /// Step 1. Get instances data from Admin API - Admin Console extension.
         var instances = await _adminApiCaller.GetInstancesAsync();
 
-        if (instances == null || instances.Count() == 0)
+        if (instances == null || !instances.Any())
         {
             _logger.LogInformation("No instances found on Admin Api.");
         }
@@ -52,9 +48,7 @@ public class Application : IApplication, IHostedService
             foreach (var instance in instances)
             {
                 /// Step 2. For each instance, Get the HealthCheck data from ODS API
-                _logger.LogInformation(
-                    $"Processing instance with name: {instance.InstanceName ?? "<No Name>"}"
-                );
+                _logger.LogInformation("Processing instance with name: {InstanceName}", instance.InstanceName ?? "<No Name>");
 
                 if (InstanceValidator.IsInstanceValid(_logger, instance))
                 {
@@ -81,7 +75,7 @@ public class Application : IApplication, IHostedService
                     else
                     {
                         _logger.LogInformation(
-                            $"No HealthCheck data has been collected for instance with name: {instance.InstanceName}"
+                            "No HealthCheck data has been collected for instance with name: {InstanceName}", instance.InstanceName
                         );
                     }
                 }

@@ -22,7 +22,7 @@ public static class InstanceValidator
                 messages.Add("AuthenticationUrl is required.");
 
             if (string.IsNullOrEmpty(instance.ResourceUrl))
-                messages.Add("ResourcesUrl is required.");
+                messages.Add("ResourceUrl is required.");
 
             if (string.IsNullOrEmpty(instance.ClientId))
                 messages.Add("ClientId is required.");
@@ -34,7 +34,7 @@ public static class InstanceValidator
         if (messages != null && messages.Count > 0)
         {
             string concatenatedMessages = String.Concat(messages);
-            logger.LogWarning($"The instance obtained from Admin API is not properly formed. {concatenatedMessages}");
+            logger.LogWarning("The instance obtained from Admin API is not properly formed. {Messages}", concatenatedMessages);
             return false;
         }
 

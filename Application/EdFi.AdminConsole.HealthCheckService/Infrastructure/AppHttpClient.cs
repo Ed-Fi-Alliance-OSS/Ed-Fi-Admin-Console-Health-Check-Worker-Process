@@ -21,7 +21,7 @@ public class AppHttpClient : IAppHttpClient
     private readonly HttpClient _httpClient;
     protected readonly ILogger _logger;
     protected readonly IOptions<AppSettings> _options;
-    private IHttpRequestMessageBuilder _httpRequestMessageBuilder;
+    private readonly IHttpRequestMessageBuilder _httpRequestMessageBuilder;
 
     public AppHttpClient(HttpClient httpClient, ILogger logger, IOptions<AppSettings> options, IHttpRequestMessageBuilder httpRequestMessageBuilder)
     {

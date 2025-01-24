@@ -5,7 +5,6 @@
 
 using EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
-using EdFi.AdminConsole.HealthCheckService.Infrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
@@ -17,19 +16,13 @@ public interface IOdsApiCaller
 
 public class OdsApiCaller : IOdsApiCaller
 {
-    private readonly ILogger _logger;
-    private IOdsApiClient _odsApiClient;
-    private IAppSettingsOdsApiEndpoints _appSettingsOdsApiEndpoints;
-    private readonly ICommandArgs _commandArgs;
-    //private IOdsResourceEndpointUrlBuilder _odsResourceEndpointUrlBuilder;
+    private readonly IOdsApiClient _odsApiClient;
+    private readonly IAppSettingsOdsApiEndpoints _appSettingsOdsApiEndpoints;
 
-    public OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints, ICommandArgs commandArgs/*, IOdsResourceEndpointUrlBuilder odsResourceEndpointUrlBuilder*/)
+    public OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints, ICommandArgs commandArgs)
     {
-        _logger = logger;
         _odsApiClient = odsApiClient;
         _appSettingsOdsApiEndpoints = appSettingsOdsApiEndpoints;
-        _commandArgs = commandArgs;
-        //_odsResourceEndpointUrlBuilder = odsResourceEndpointUrlBuilder;
     }
 
     public async Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminApiInstance instance)

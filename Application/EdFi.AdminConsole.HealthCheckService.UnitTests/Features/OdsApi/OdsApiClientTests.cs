@@ -52,7 +52,7 @@ public class Given_an_ods_environment_with_single_tenant
             A.CallTo(() => httpClient.SendAsync(adminApiInstance.ResourceUrl, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", "123")))
                 .Returns(new ApiResponse(HttpStatusCode.OK, string.Empty, headers));
 
-            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings(), new CommandArgs(_configuration));
+            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings());
 
             var response = await odsApiClient.OdsApiGet(
                 adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl, "Get Total Count from Ods Api");
@@ -82,7 +82,7 @@ public class Given_an_ods_environment_with_single_tenant
             A.CallTo(() => httpClient.SendAsync(adminApiInstance.ResourceUrl, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", "123")))
                 .Returns(new ApiResponse(HttpStatusCode.OK, string.Empty, headers));
 
-            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings(), new CommandArgs(_configuration));
+            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings());
 
             var response = await odsApiClient.OdsApiGet(adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl, "Get Total Count from Ods Api");
 

@@ -72,6 +72,7 @@ public static class Startup
     {
         var handler = new HttpClientHandler();
         handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+#pragma warning disable S4830 // Server certificates should be verified during SSL/TLS connections
         handler.ServerCertificateCustomValidationCallback = (
             httpRequestMessage,
             cert,
@@ -81,6 +82,7 @@ public static class Startup
         {
             return true;
         };
+#pragma warning restore S4830
 
         return handler;
     }
