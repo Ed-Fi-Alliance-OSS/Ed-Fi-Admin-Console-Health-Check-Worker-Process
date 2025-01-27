@@ -14,7 +14,7 @@ namespace EdFi.Ods.AdminApi.HealthCheckService.UnitTests.Helpers;
 
 public class Given_an_instance_returned_from_AdminApi
 {
-    private AdminApiInstanceDocument _instance = new AdminApiInstanceDocument();
+    private AdminApiInstance _instance = new AdminApiInstance();
     private ILogger<Given_an_instance_returned_from_AdminApi> _logger;
 
     [SetUp]
@@ -22,9 +22,8 @@ public class Given_an_instance_returned_from_AdminApi
     {
         _logger = A.Fake<ILogger<Given_an_instance_returned_from_AdminApi>>();
 
-        _instance.AuthenticationUrl = "Some url";
-        _instance.BaseUrl = "Some url";
-        _instance.ResourcesUrl = "Some url";
+        _instance.OauthUrl = "Some url";
+        _instance.ResourceUrl = "Some url";
         _instance.ClientId = "Some url";
         _instance.ClientSecret = "Some url";
         _instance.InstanceId = 1;
@@ -43,35 +42,24 @@ public class Given_an_instance_returned_from_AdminApi
     }
 
     [TestFixture]
-    public class When_it_does_not_have_BaseUrl : Given_an_instance_returned_from_AdminApi
-    {
-        [Test]
-        public void should_be_invalid()
-        {
-            _instance.BaseUrl = string.Empty;
-            InstanceValidator.IsInstanceValid(_logger, _instance).ShouldBeFalse();
-        }
-    }
-
-    [TestFixture]
     public class When_it_does_not_have_AuthenticationUrl : Given_an_instance_returned_from_AdminApi
     {
         [Test]
         public void should_be_invalid()
         {
-            _instance.AuthenticationUrl = string.Empty;
+            _instance.OauthUrl = string.Empty;
             InstanceValidator.IsInstanceValid(_logger, _instance).ShouldBeFalse();
         }
     }
 
     [TestFixture]
-    public class When_it_does_not_have_ResourcesUrl : Given_an_instance_returned_from_AdminApi
+    public class When_it_does_not_have_ResourceUrl : Given_an_instance_returned_from_AdminApi
     {
 
         [Test]
         public void should_be_invalid()
         {
-            _instance.ResourcesUrl = string.Empty;
+            _instance.ResourceUrl = string.Empty;
             InstanceValidator.IsInstanceValid(_logger, _instance).ShouldBeFalse();
         }
     }
@@ -99,5 +87,4 @@ public class Given_an_instance_returned_from_AdminApi
             InstanceValidator.IsInstanceValid(_logger, _instance).ShouldBeFalse();
         }
     }
-
 }

@@ -38,7 +38,7 @@ public class Testing
         return options;
     }
 
-    public static List<string> Endpoints { get { return new List<string> { "firstEndPoint", "secondEndpoint", "thirdEndPoint" }; } }
+    public static List<string> Endpoints { get { return new List<string> { "ed-fi/firstEndPoint", "ed-fi/secondEndpoint", "ed-fi/thirdEndPoint" }; } }
 
     public static List<OdsApiEndpointNameCount> HealthCheckData
     {
@@ -48,19 +48,19 @@ public class Testing
             {
                 new OdsApiEndpointNameCount()
                 {
-                    OdsApiEndpointName = "firstEndPoint",
+                    OdsApiEndpointName = "ed-fi/firstEndPoint",
                     OdsApiEndpointCount = 3,
                     AnyErrros = false
                 },
                 new OdsApiEndpointNameCount()
                 {
-                    OdsApiEndpointName = "secondEndpoint",
+                    OdsApiEndpointName = "ed-fi/secondEndpoint",
                     OdsApiEndpointCount = 8,
                     AnyErrros = false
                 },
                 new OdsApiEndpointNameCount()
                 {
-                    OdsApiEndpointName = "thirdEndPoint",
+                    OdsApiEndpointName = "ed-fi/thirdEndPoint",
                     OdsApiEndpointCount = 5,
                     AnyErrros = false
                 }
@@ -68,33 +68,35 @@ public class Testing
         }
     }
 
-    public static List<AdminApiInstanceDocument> AdminApiInstances
+    public static List<AdminApiInstance> AdminApiInstances
     {
         get
         {
-            return new List<AdminApiInstanceDocument>
+            return new List<AdminApiInstance>
             {
-                new AdminApiInstanceDocument()
+                new AdminApiInstance()
                 {
                     InstanceId = 1,
+                    OdsInstanceId = 1,
                     TenantId = 1,
                     InstanceName = "instance 1",
                     ClientId = "one client",
                     ClientSecret = "one secret",
-                    BaseUrl = "http://www.myserver.com",
-                    AuthenticationUrl = "/connect/token",
-                    ResourcesUrl = "/data/v3/ed-fi/",
+                    OauthUrl = "http://www.myserver.com/connect/token",
+                    ResourceUrl = "http://www.myserver.com/data/v3",
+                    Status = "Completed",
                 },
-                new AdminApiInstanceDocument()
+                new AdminApiInstance()
                 {
                     InstanceId = 2,
+                    OdsInstanceId = 2,
                     TenantId = 2,
                     InstanceName = "instance 2",
                     ClientId = "another client",
                     ClientSecret = "another secret",
-                    BaseUrl = "http://www.otherserver.com",
-                    AuthenticationUrl = "/connect/token",
-                    ResourcesUrl = "/data/v3/ed-fi/",
+                    OauthUrl = "http://www.myserver.com/connect/token",
+                    ResourceUrl = "http://www.myserver.com/data/v3",
+                    Status = "Completed",
                 }
             };
         }
@@ -102,30 +104,29 @@ public class Testing
 
     public const string Instances =
     @"[{
-        ""Document"": {
-              ""instanceId"": 1,
-              ""tenantId"": 1,
-              ""instanceName"": ""instance 1"",
-              ""clientId"": ""one client"",
-              ""clientSecret"": ""one secret"",
-              ""baseUrl"": ""http://www.myserver.com"",
-              ""resourcesUrl"": ""/data/v3/ed-fi/"",
-              ""authenticationUrl"": ""/connect/token""
-        }},{
-        ""Document"":{
-            ""instanceId"": 2,
-              ""tenantId"": 2,
-              ""instanceName"": ""instance 2"",
-              ""clientId"": ""another client"",
-              ""clientSecret"": ""another secret"",
-              ""baseUrl"": ""http://www.otherserver.com"",
-              ""resourcesUrl"": ""/data/v3/ed-fi/"",
-              ""authenticationUrl"": ""/connect/token""
-        }
+        ""instanceId"": 1,
+        ""odsInstanceId"": 1,
+        ""tenantId"": 1,
+        ""instanceName"": ""instance 1"",
+        ""clientId"": ""one client"",
+        ""clientSecret"": ""one secret"",
+        ""resourceUrl"": ""http://www.myserver.com/data/v3"",
+        ""oauthUrl"": ""http://www.myserver.com/connect/token"",
+        ""status"": ""Completed""
+      },{
+        ""instanceId"": 2,
+        ""odsInstanceId"": 2,
+        ""tenantId"": 2,
+        ""instanceName"": ""instance 2"",
+        ""clientId"": ""another client"",
+        ""clientSecret"": ""another secret"",
+        ""resourceUrl"": ""http://www.myserver.com/data/v3"",
+        ""oauthUrl"": ""http://www.myserver.com/connect/token"",
+        ""status"": ""Completed""
     }]";
 
 
-    public static Dictionary<string, string> CommandArgsDicWithMultitenant = new Dictionary<string, string>
+    public static Dictionary<string, string?> CommandArgsDicWithMultitenant = new Dictionary<string, string?>
         {
             {"isMultiTenant", "true"},
             {"tenant", "Tenant1"},
@@ -133,28 +134,28 @@ public class Testing
             {"clientsecret", "SomeClientSecret"}
         };
 
-    public static Dictionary<string, string> CommandArgsDicWithSingletenant = new Dictionary<string, string>
+    public static Dictionary<string, string?> CommandArgsDicWithSingletenant = new Dictionary<string, string?>
         {
             {"isMultiTenant", "false"},
             {"clientid", "SomeClientId"},
             {"clientsecret", "SomeClientSecret"}
         };
 
-    public static Dictionary<string, string> CommandArgsDicNoClientId = new Dictionary<string, string>
+    public static Dictionary<string, string?> CommandArgsDicNoClientId = new Dictionary<string, string?>
         {
             {"isMultiTenant", "false"},
             {"clientid", ""},
             {"clientsecret", "SomeClientSecret"}
         };
 
-    public static Dictionary<string, string> CommandArgsDicNoClientSecret = new Dictionary<string, string>
+    public static Dictionary<string, string?> CommandArgsDicNoClientSecret = new Dictionary<string, string?>
         {
             {"isMultiTenant", "false"},
             {"clientid", "SomeClientId"},
             {"clientsecret", ""}
         };
 
-    public static Dictionary<string, string> CommandArgsDicWithMultitenantNoTenant = new Dictionary<string, string>
+    public static Dictionary<string, string?> CommandArgsDicWithMultitenantNoTenant = new Dictionary<string, string?>
         {
             {"isMultiTenant", "true"},
             {"tenant", ""},

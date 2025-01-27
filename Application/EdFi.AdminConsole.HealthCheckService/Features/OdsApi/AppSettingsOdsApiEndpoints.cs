@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 // Licensed to the Ed-Fi Alliance under one or more agreements.
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
@@ -15,15 +15,12 @@ public interface IAppSettingsOdsApiEndpoints : IEnumerable<string>
 
 public class AppSettingsOdsApiEndpoints : IAppSettingsOdsApiEndpoints
 {
-    private List<string> endpoints;
-    private OdsApiSettings _odsApiOptions;
+    private readonly List<string> endpoints;
 
     public AppSettingsOdsApiEndpoints(IOptions<OdsApiSettings> odsApiOptions)
     {
-        _odsApiOptions = odsApiOptions.Value;
-
         endpoints = new List<string>();
-        endpoints.AddRange(_odsApiOptions.Endpoints);
+        endpoints.AddRange(odsApiOptions.Value.Endpoints);
     }
 
     public IEnumerator<string> GetEnumerator()

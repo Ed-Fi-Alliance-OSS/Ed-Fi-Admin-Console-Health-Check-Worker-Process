@@ -11,5 +11,5 @@ public class OdsApiEndpointNameCount
 
     public int OdsApiEndpointCount { get; set; } = 0;
 
-    public bool AnyErrros {  get; set; } = false;
+    public bool AnyErrros { get; set; } = false;
 }

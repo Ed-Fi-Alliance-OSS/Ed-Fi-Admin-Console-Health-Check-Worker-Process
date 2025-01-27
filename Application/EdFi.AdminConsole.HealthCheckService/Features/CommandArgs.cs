@@ -3,7 +3,6 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using System.Reflection.Metadata;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
 using Microsoft.Extensions.Configuration;
 
@@ -19,7 +18,7 @@ public interface ICommandArgs
 
 public class CommandArgs : ICommandArgs
 {
-    private IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
 
     public CommandArgs(IConfiguration configuration)
     {

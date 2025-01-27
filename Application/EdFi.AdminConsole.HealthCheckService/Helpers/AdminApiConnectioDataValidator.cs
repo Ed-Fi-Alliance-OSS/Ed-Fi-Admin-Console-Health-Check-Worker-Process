@@ -38,7 +38,7 @@ public static class AdminApiConnectioDataValidator
         if (messages != null && messages.Count > 0)
         {
             string concatenatedMessages = String.Concat(messages);
-            logger.LogWarning($"The AdminApiSettings section on the App Settings file and/or the App command arguments have not been set properly. {concatenatedMessages}");
+            logger.LogWarning("The AdminApiSettings section on the App Settings file and/or the App command arguments have not been set properly. {Messages}", concatenatedMessages);
             return false;
         }
 

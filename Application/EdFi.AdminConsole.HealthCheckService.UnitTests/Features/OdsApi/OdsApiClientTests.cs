@@ -42,22 +42,20 @@ public class Given_an_ods_environment_with_single_tenant
             var httpClient = A.Fake<IAppHttpClient>();
             var adminApiInstance = Testing.AdminApiInstances.First();
             var encodedKeySecret = Encoding.ASCII.GetBytes($"{adminApiInstance.ClientId}:{adminApiInstance.ClientSecret}");
-            var authFullUrl = adminApiInstance.BaseUrl + adminApiInstance.AuthenticationUrl;
-            var resourceFullUrl = adminApiInstance.BaseUrl + adminApiInstance.ResourcesUrl;
             var headers = new HttpResponseMessage().Headers;
             headers.Add(Constants.TotalCountHeader, "5");
 
             A.CallTo(() => httpClient.SendAsync(
-                authFullUrl, HttpMethod.Post, A<FormUrlEncodedContent>.Ignored, new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encodedKeySecret))))
+                adminApiInstance.OauthUrl, HttpMethod.Post, A<FormUrlEncodedContent>.Ignored, new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encodedKeySecret))))
                 .Returns(new ApiResponse(HttpStatusCode.OK, "{ \"access_token\": \"123\"}"));
 
-            A.CallTo(() => httpClient.SendAsync(resourceFullUrl, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", "123")))
+            A.CallTo(() => httpClient.SendAsync(adminApiInstance.ResourceUrl, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", "123")))
                 .Returns(new ApiResponse(HttpStatusCode.OK, string.Empty, headers));
 
-            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings(), new CommandArgs(_configuration));
+            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings());
 
             var response = await odsApiClient.OdsApiGet(
-                authFullUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, resourceFullUrl, "Get Total Count from Ods Api");
+                adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl, "Get Total Count from Ods Api");
 
             response.Headers.ShouldNotBeNull();
             response.Headers.Any(o => o.Key == Constants.TotalCountHeader).ShouldBe(true);
@@ -73,23 +71,20 @@ public class Given_an_ods_environment_with_single_tenant
             var httpClient = A.Fake<IAppHttpClient>();
             var adminApiInstance = Testing.AdminApiInstances.First();
             var encodedKeySecret = Encoding.ASCII.GetBytes($"{adminApiInstance.ClientId}:{adminApiInstance.ClientSecret}");
-            var authFullUrl = adminApiInstance.BaseUrl + adminApiInstance.AuthenticationUrl;
-            var resourceFullUrl = adminApiInstance.BaseUrl + adminApiInstance.ResourcesUrl;
 
             var headers = new HttpResponseMessage().Headers;
             headers.Add(Constants.TotalCountHeader, "5");
 
             A.CallTo(() => httpClient.SendAsync(
-                authFullUrl, HttpMethod.Post, A<FormUrlEncodedContent>.Ignored, new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encodedKeySecret))))
+                adminApiInstance.OauthUrl, HttpMethod.Post, A<FormUrlEncodedContent>.Ignored, new AuthenticationHeaderValue("Basic", Convert.ToBase64String(encodedKeySecret))))
                 .Returns(new ApiResponse(HttpStatusCode.InternalServerError, string.Empty));
 
-            A.CallTo(() => httpClient.SendAsync(resourceFullUrl, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", "123")))
+            A.CallTo(() => httpClient.SendAsync(adminApiInstance.ResourceUrl, HttpMethod.Get, null as StringContent, new AuthenticationHeaderValue("bearer", "123")))
                 .Returns(new ApiResponse(HttpStatusCode.OK, string.Empty, headers));
 
-            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings(), new CommandArgs(_configuration));
+            var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings());
 
-            var response = await odsApiClient.OdsApiGet(
-                adminApiInstance.BaseUrl + adminApiInstance.AuthenticationUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.BaseUrl + adminApiInstance.ResourcesUrl, "Get Total Count from Ods Api");
+            var response = await odsApiClient.OdsApiGet(adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl, "Get Total Count from Ods Api");
 
             response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
         }

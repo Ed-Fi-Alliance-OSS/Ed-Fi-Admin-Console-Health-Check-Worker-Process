@@ -3,26 +3,25 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using System.Collections.Generic;
-using System.Text;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 
 public interface IAdminApiCaller
 {
-    Task<IEnumerable<AdminApiInstanceDocument>> GetInstancesAsync();
-    Task PostHealCheckAsync(AdminApiHealthCheckPost endpoints);
+    Task<IEnumerable<AdminApiInstance>> GetInstancesAsync();
+    Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData);
 }
 
 public class AdminApiCaller : IAdminApiCaller
 {
     private readonly ILogger _logger;
-    private IAdminApiClient _adminApiClient;
+    private readonly IAdminApiClient _adminApiClient;
     private readonly IAdminApiSettings _adminApiOptions;
     private readonly ICommandArgs _commandArgs;
 
@@ -34,11 +33,10 @@ public class AdminApiCaller : IAdminApiCaller
         _commandArgs = commandArgs;
     }
 
-    public async Task<IEnumerable<AdminApiInstanceDocument>> GetInstancesAsync()
+    public async Task<IEnumerable<AdminApiInstance>> GetInstancesAsync()
     {
         if (AdminApiConnectioDataValidator.IsValid(_logger, _adminApiOptions, _commandArgs))
         {
-            var instancesEndpoint = _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI;
             var response = await _adminApiClient.AdminApiGet("Getting instances from Admin API - Admin Console extension");
             var instances = new List<AdminApiInstance>();
 
@@ -53,31 +51,26 @@ public class AdminApiCaller : IAdminApiCaller
                         {
                             var instance = JsonConvert.DeserializeObject<AdminApiInstance>(jObjectItem.ToString());
                             if (instance != null)
-                            {
                                 instances.Add(instance);
-                                //return instances.Select(i => i.Document) ?? Enumerable.Empty<AdminApiInstanceDocument>();
-                            }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Not able to process instance.");
+                            _logger.LogError(ex, $"Not able to process instance.");
                         }
                     }
                 }
             }
-            return instances.Select(i => i.Document) ?? Enumerable.Empty<AdminApiInstanceDocument>();
+            return instances;
         }
         else
         {
             _logger.LogError("AdminApi Settings has not been set properly.");
-            return new List<AdminApiInstanceDocument>();
+            return new List<AdminApiInstance>();
         }
     }
 
     public async Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData)
     {
-        var healthCheckEndpoint = _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleHealthCheckURI;
-
         var instanceHealthCheckDataJson = System.Text.Json.JsonSerializer.Serialize(instanceHealthCheckData);
         var instanceHealthCheckDataContent = new StringContent(instanceHealthCheckDataJson, Encoding.UTF8, "application/json");
 
@@ -85,22 +78,8 @@ public class AdminApiCaller : IAdminApiCaller
 
         if (response.StatusCode != System.Net.HttpStatusCode.Created)
         {
-            _logger.LogError($"Not able to post HealthCheck data to Ods Api. Tenant Id: {instanceHealthCheckData.TenantId}.");
-            _logger.LogError($"Status Code returned is: {response.StatusCode}.");
+            _logger.LogError("Not able to post HealthCheck data to Ods Api. Tenant Id: {TenantId}.", instanceHealthCheckData.TenantId);
+            _logger.LogError("Status Code returned is: {StatusCode}.", response.StatusCode);
         }
-    }
-
-    private bool IsAdminApiSettingsValid()
-    {
-        if (string.IsNullOrEmpty(_adminApiOptions.AccessTokenUrl)
-            || string.IsNullOrEmpty(_adminApiOptions.ApiUrl)
-            || string.IsNullOrEmpty(_adminApiOptions.AdminConsoleInstancesURI)
-            || string.IsNullOrEmpty(_adminApiOptions.AdminConsoleHealthCheckURI)
-            || string.IsNullOrEmpty(_commandArgs.ClientId)
-            || string.IsNullOrEmpty(_commandArgs.ClientSecret)
-            )
-        { return false; }
-        else
-        { return true; }
     }
 }

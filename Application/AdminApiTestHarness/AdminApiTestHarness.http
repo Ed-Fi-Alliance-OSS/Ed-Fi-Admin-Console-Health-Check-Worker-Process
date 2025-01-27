@@ -1,0 +1,14 @@
+@AdminApiTestHarness_HostAddress = https://localhost:7218
+
+GET {{AdminApiTestHarness_HostAddress}}/adminconsole/instances
+Accept: application/json
+
+###
+
+POST {{AdminApiTestHarness_HostAddress}}/adminconsole/healthcheck
+Accept: application/json
+
+###
+
+POST {{AdminApiTestHarness_HostAddress}}/connect/token
+Accept: application/json
