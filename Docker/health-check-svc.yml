@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  health-check-service:
+    build:
+      context: ../
+      dockerfile: Docker/Dockerfile
+    volumes:
+      - service-logs:/var/log/achealthsvc.log
+    env_file:
+      - .env
+
+volumes:
+  service-logs:
+    name: health-check-service-logs

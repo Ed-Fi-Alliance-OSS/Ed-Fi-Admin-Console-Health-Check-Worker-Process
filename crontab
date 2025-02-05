@@ -1,0 +1,2 @@
+* * * * * root dotnet /app/EdFi.AdminConsole.HealthCheckService.dll >> /var/log/achealthsvc.log
+# TEST write Application output to achealthsvc.log every minute
