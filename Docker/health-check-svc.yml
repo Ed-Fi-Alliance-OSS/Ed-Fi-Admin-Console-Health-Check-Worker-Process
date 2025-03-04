@@ -9,7 +9,7 @@ services:
       context: ../
       dockerfile: Docker/Dockerfile
     volumes:
-      - service-logs:/var/log/achealthsvc.log
+      - service-logs:/var/log/achealthsvc
 
 volumes:
   service-logs:
