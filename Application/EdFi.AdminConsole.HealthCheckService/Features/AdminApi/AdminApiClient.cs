@@ -4,8 +4,9 @@
 // See the LICENSE and NOTICES files in the project root for more information.
 
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
-using EdFi.AdminConsole.HealthCheckService.Helpers;
+using System.Text;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,36 +16,25 @@ namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 
 public interface IAdminApiClient
 {
-    Task<ApiResponse> AdminApiGet(string getInfo);
+    Task<ApiResponse> AdminApiGet(string url, string? tenant);
 
-    Task<ApiResponse> AdminApiPost(StringContent content, string getInfo);
+    Task<ApiResponse> AdminApiPost(string url, string content, string? tenant);
 }
 
-public class AdminApiClient : IAdminApiClient
+public class AdminApiClient(
+    IAppHttpClient appHttpClient,
+    ILogger logger,
+    IOptions<AdminApiSettings> adminApiOptions
+    ) : IAdminApiClient
 {
-    private readonly IAppHttpClient _appHttpClient;
-    protected readonly ILogger _logger;
-    private readonly IAdminApiSettings _adminApiOptions;
-    private readonly ICommandArgs _commandArgs;
-    private string _accessToken;
+    private readonly IAppHttpClient _appHttpClient = appHttpClient;
+    protected readonly ILogger _logger = logger;
+    private readonly AdminApiSettings _adminApiOptions = adminApiOptions.Value;
+    private string _accessToken = string.Empty;
 
-    public AdminApiClient(
-        IAppHttpClient appHttpClient,
-        ILogger logger,
-        IOptions<AdminApiSettings> adminApiOptions,
-        ICommandArgs commandArgs
-    )
+    public async Task<ApiResponse> AdminApiGet(string url, string? tenant)
     {
-        _appHttpClient = appHttpClient;
-        _logger = logger;
-        _adminApiOptions = adminApiOptions.Value;
-        _commandArgs = commandArgs;
-        _accessToken = string.Empty;
-    }
-
-    public async Task<ApiResponse> AdminApiGet(string getInfo)
-    {
-        ApiResponse response = new ApiResponse(HttpStatusCode.InternalServerError, string.Empty);
+        ApiResponse response = new(HttpStatusCode.InternalServerError, string.Empty);
         await GetAccessToken();
 
         if (!string.IsNullOrEmpty(_accessToken))
@@ -52,12 +42,19 @@ public class AdminApiClient : IAdminApiClient
             const int RetryAttempts = 3;
             var currentAttempt = 0;
 
+            StringContent? content = null;
+            if (!string.IsNullOrEmpty(tenant))
+            {
+                content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+                content.Headers.Add("tenant", tenant);
+            }
+
             while (RetryAttempts > currentAttempt)
             {
                 response = await _appHttpClient.SendAsync(
-                    _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleInstancesURI + Constants.CompletedInstances,
+                    url,
                     HttpMethod.Get,
-                    null as StringContent,
+                    content,
                     new AuthenticationHeaderValue("bearer", _accessToken)
                 );
 
@@ -71,21 +68,24 @@ public class AdminApiClient : IAdminApiClient
         return response;
     }
 
-    public async Task<ApiResponse> AdminApiPost(StringContent content, string getInfo)
+    public async Task<ApiResponse> AdminApiPost(string url, string content, string? tenant)
     {
-        ApiResponse response = new ApiResponse(HttpStatusCode.InternalServerError, string.Empty);
+        ApiResponse response = new(HttpStatusCode.InternalServerError, string.Empty);
         await GetAccessToken();
 
         const int RetryAttempts = 3;
         var currentAttempt = 0;
         while (RetryAttempts > currentAttempt)
         {
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+
+            if (!string.IsNullOrEmpty(tenant))
+                stringContent.Headers.Add("tenant", tenant);
 
             response = await _appHttpClient.SendAsync(
-                _adminApiOptions.ApiUrl + _adminApiOptions.AdminConsoleHealthCheckURI,
+                url,
                 HttpMethod.Post,
-                content,
+                stringContent,
                 new AuthenticationHeaderValue("bearer", _accessToken)
             );
 
@@ -102,14 +102,13 @@ public class AdminApiClient : IAdminApiClient
     {
         if (string.IsNullOrEmpty(_accessToken))
         {
-            FormUrlEncodedContent content = new FormUrlEncodedContent(
-                new List<KeyValuePair<string, string>>
-                {
-                    new KeyValuePair<string, string>("client_id", _commandArgs.ClientId),
-                    new KeyValuePair<string, string>("client_secret", _commandArgs.ClientSecret),
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                    new KeyValuePair<string, string>("scope", "edfi_admin_api/full_access"),
-                }
+            FormUrlEncodedContent content = new(
+                [
+                    new("username", _adminApiOptions.Username),
+                    new("client_id", _adminApiOptions.ClientId),
+                    new("password", _adminApiOptions.Password),
+                    new("grant_type", "password")
+                ]
             );
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");

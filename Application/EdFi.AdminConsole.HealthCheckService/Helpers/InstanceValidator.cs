@@ -10,7 +10,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Helpers;
 
 public static class InstanceValidator
 {
-    public static bool IsInstanceValid(ILogger logger, AdminApiInstance instance)
+    public static bool IsInstanceValid(ILogger logger, AdminConsoleInstance instance)
     {
         var messages = new List<string>();
 
@@ -33,8 +33,8 @@ public static class InstanceValidator
 
         if (messages != null && messages.Count > 0)
         {
-            string concatenatedMessages = String.Concat(messages);
-            logger.LogWarning("The instance obtained from Admin API is not properly formed. {Messages}", concatenatedMessages);
+            string concatenatedMessages = string.Concat(messages);
+            logger.LogWarning("The instance {Name} obtained from Admin API is not properly formed. {Messages}", instance?.InstanceName, concatenatedMessages);
             return false;
         }
 

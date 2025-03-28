@@ -3,7 +3,6 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using EdFi.AdminConsole.HealthCheckService.Features;
 using EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 using EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
@@ -31,7 +30,6 @@ public static class Startup
 #pragma warning restore CS8603 // Possible null reference return.
 
         services.AddSingleton<IAppSettingsOdsApiEndpoints, AppSettingsOdsApiEndpoints>();
-        services.AddSingleton<ICommandArgs, CommandArgs>();
 
         services.AddTransient<IHttpRequestMessageBuilder, HttpRequestMessageBuilder>();
 
@@ -70,17 +68,19 @@ public static class Startup
 
     private static HttpClientHandler IgnoresCertificateErrorsHandler()
     {
-        var handler = new HttpClientHandler();
-        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-#pragma warning disable S4830 // Server certificates should be verified during SSL/TLS connections
-        handler.ServerCertificateCustomValidationCallback = (
-            httpRequestMessage,
-            cert,
-            cetChain,
-            policyErrors
-        ) =>
+        var handler = new HttpClientHandler
         {
-            return true;
+            ClientCertificateOptions = ClientCertificateOption.Manual,
+#pragma warning disable S4830 // Server certificates should be verified during SSL/TLS connections
+            ServerCertificateCustomValidationCallback = (
+                httpRequestMessage,
+                cert,
+                cetChain,
+                policyErrors
+            ) =>
+            {
+                return true;
+            }
         };
 #pragma warning restore S4830
 

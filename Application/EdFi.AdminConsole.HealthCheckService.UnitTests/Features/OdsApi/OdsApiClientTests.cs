@@ -6,13 +6,10 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using EdFi.AdminConsole.HealthCheckService.Features;
 using EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
-using EdFi.Ods.AdminApi.HealthCheckService.UnitTests;
 using FakeItEasy;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Shouldly;
@@ -21,16 +18,11 @@ namespace EdFi.AdminConsole.HealthCheckService.UnitTests.Features.OdsApi;
 
 public class Given_an_ods_environment_with_single_tenant
 {
-    private IConfiguration _configuration;
     private ILogger<Given_an_ods_environment_with_single_tenant> _logger;
 
     [SetUp]
     public void SetUp()
     {
-        _configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(Testing.CommandArgsDicWithSingletenant)
-            .Build();
-
         _logger = A.Fake<ILogger<When_HealthCheck_data_is_requested>>();
     }
 
@@ -55,7 +47,7 @@ public class Given_an_ods_environment_with_single_tenant
             var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings());
 
             var response = await odsApiClient.OdsApiGet(
-                adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl, "Get Total Count from Ods Api");
+                adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl);
 
             response.Headers.ShouldNotBeNull();
             response.Headers.Any(o => o.Key == Constants.TotalCountHeader).ShouldBe(true);
@@ -84,7 +76,7 @@ public class Given_an_ods_environment_with_single_tenant
 
             var odsApiClient = new OdsApiClient(httpClient, _logger, Testing.GetAppSettings());
 
-            var response = await odsApiClient.OdsApiGet(adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl, "Get Total Count from Ods Api");
+            var response = await odsApiClient.OdsApiGet(adminApiInstance.OauthUrl, adminApiInstance.ClientId, adminApiInstance.ClientSecret, adminApiInstance.ResourceUrl);
 
             response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
         }

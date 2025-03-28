@@ -69,6 +69,6 @@ public static class Program
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-        config.AddEnvironmentVariables();
+        config.AddEnvironmentVariables(prefix: "EdFi_AdminConsole_");
     }
 }

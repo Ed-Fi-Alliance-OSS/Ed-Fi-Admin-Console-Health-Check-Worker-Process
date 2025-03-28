@@ -3,42 +3,75 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
+using System.Text;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 
 public interface IAdminApiCaller
 {
-    Task<IEnumerable<AdminApiInstance>> GetInstancesAsync();
-    Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData);
+    Task<IEnumerable<AdminConsoleTenant>> GetTenantsAsync();
+    Task<IEnumerable<AdminConsoleInstance>> GetInstancesAsync(string? tenant);
+    Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData, string? tenant);
 }
 
-public class AdminApiCaller : IAdminApiCaller
+public class AdminApiCaller(ILogger logger, IAdminApiClient adminApiClient, IOptions<AdminApiSettings> adminApiOptions) : IAdminApiCaller
 {
-    private readonly ILogger _logger;
-    private readonly IAdminApiClient _adminApiClient;
-    private readonly IAdminApiSettings _adminApiOptions;
-    private readonly ICommandArgs _commandArgs;
+    private readonly ILogger _logger = logger;
+    private readonly IAdminApiClient _adminApiClient = adminApiClient;
+    private readonly AdminApiSettings _adminApiOptions = adminApiOptions.Value;
 
-    public AdminApiCaller(ILogger logger, IAdminApiClient adminApiClient, IOptions<AdminApiSettings> adminApiOptions, ICommandArgs commandArgs)
+    public async Task<IEnumerable<AdminConsoleTenant>> GetTenantsAsync()
     {
-        _logger = logger;
-        _adminApiClient = adminApiClient;
-        _adminApiOptions = adminApiOptions.Value;
-        _commandArgs = commandArgs;
+        if (AdminApiConnectioDataValidator.IsValid(_logger, _adminApiOptions))
+        {
+            var response = await _adminApiClient.AdminApiGet(_adminApiOptions.AdminConsoleTenantsURL, null);
+            var tenants = new List<AdminConsoleTenant>();
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK && !string.IsNullOrEmpty(response.Content))
+            {
+                var tenantsJObject = JsonConvert.DeserializeObject<IEnumerable<JObject>>(response.Content);
+                if (tenantsJObject != null)
+                {
+                    foreach (var jObjectItem in tenantsJObject)
+                    {
+                        try
+                        {
+                            var jsonString = jObjectItem.ToString();
+                            if (jsonString.StartsWith("{{") && jsonString.EndsWith("}}"))
+                            {
+                                jsonString = jsonString[1..^1];
+                            }
+                            var tenant = JsonConvert.DeserializeObject<AdminConsoleTenant>(jsonString);
+                            if (tenant != null)
+                                tenants.Add(tenant);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Not able to process tenant.");
+                        }
+                    }
+                }
+            }
+            return tenants;
+        }
+        else
+        {
+            _logger.LogError("AdminApi Settings has not been set properly.");
+            return [];
+        }
     }
 
-    public async Task<IEnumerable<AdminApiInstance>> GetInstancesAsync()
+    public async Task<IEnumerable<AdminConsoleInstance>> GetInstancesAsync(string? tenant)
     {
-        if (AdminApiConnectioDataValidator.IsValid(_logger, _adminApiOptions, _commandArgs))
+        if (AdminApiConnectioDataValidator.IsValid(_logger, _adminApiOptions))
         {
-            var response = await _adminApiClient.AdminApiGet("Getting instances from Admin API - Admin Console extension");
-            var instances = new List<AdminApiInstance>();
+            var response = await _adminApiClient.AdminApiGet(_adminApiOptions.AdminConsoleInstancesURL + Constants.CompletedInstances, tenant);
+            var instances = new List<AdminConsoleInstance>();
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK && !string.IsNullOrEmpty(response.Content))
             {
@@ -49,7 +82,7 @@ public class AdminApiCaller : IAdminApiCaller
                     {
                         try
                         {
-                            var instance = JsonConvert.DeserializeObject<AdminApiInstance>(jObjectItem.ToString());
+                            var instance = JsonConvert.DeserializeObject<AdminConsoleInstance>(jObjectItem.ToString());
                             if (instance != null)
                                 instances.Add(instance);
                         }
@@ -65,18 +98,17 @@ public class AdminApiCaller : IAdminApiCaller
         else
         {
             _logger.LogError("AdminApi Settings has not been set properly.");
-            return new List<AdminApiInstance>();
+            return [];
         }
     }
 
-    public async Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData)
+    public async Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData, string? tenant)
     {
         var instanceHealthCheckDataJson = System.Text.Json.JsonSerializer.Serialize(instanceHealthCheckData);
-        var instanceHealthCheckDataContent = new StringContent(instanceHealthCheckDataJson, Encoding.UTF8, "application/json");
 
-        var response = await _adminApiClient.AdminApiPost(instanceHealthCheckDataContent, "Posting HealthCheck to Admin API - Admin Console extension");
+        var response = await _adminApiClient.AdminApiPost(_adminApiOptions.AdminConsoleHealthCheckURL, instanceHealthCheckDataJson, tenant);
 
-        if (response.StatusCode != System.Net.HttpStatusCode.Created)
+        if (response.StatusCode is not System.Net.HttpStatusCode.Created and not System.Net.HttpStatusCode.OK)
         {
             _logger.LogError("Not able to post HealthCheck data to Ods Api. Tenant Id: {TenantId}.", instanceHealthCheckData.TenantId);
             _logger.LogError("Status Code returned is: {StatusCode}.", response.StatusCode);
