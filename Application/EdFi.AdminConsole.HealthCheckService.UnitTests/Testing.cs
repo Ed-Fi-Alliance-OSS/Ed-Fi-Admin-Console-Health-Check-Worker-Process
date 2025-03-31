@@ -27,7 +27,10 @@ public class Testing
             AdminConsoleHealthCheckURL = "http://www.myserver.com/adminconsole/healthcheck",
             Username = "SomeUsername",
             ClientId = "SomeClient",
-            Password = "SomePassword"
+            ClientSecret = "SomeClientSecret",
+            Password = "SomePassword",
+            GrantType = "GrantType",
+            Scope = "Scope"
         });
     }
 

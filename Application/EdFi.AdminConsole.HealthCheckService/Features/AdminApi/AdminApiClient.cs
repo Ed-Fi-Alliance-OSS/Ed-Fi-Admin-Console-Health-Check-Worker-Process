@@ -106,8 +106,10 @@ public class AdminApiClient(
                 [
                     new("username", _adminApiOptions.Username),
                     new("client_id", _adminApiOptions.ClientId),
+                    new("client_secret", _adminApiOptions.ClientSecret),
                     new("password", _adminApiOptions.Password),
-                    new("grant_type", "password")
+                    new("grant_type", _adminApiOptions.GrantType),
+                    new("scope", _adminApiOptions.Scope)
                 ]
             );
 

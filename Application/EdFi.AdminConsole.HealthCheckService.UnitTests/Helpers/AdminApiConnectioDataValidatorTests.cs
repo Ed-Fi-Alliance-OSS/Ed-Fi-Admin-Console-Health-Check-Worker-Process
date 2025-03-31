@@ -26,7 +26,10 @@ public class Given_AdminApiSettings_provided
         _adminApiSettings.AdminConsoleHealthCheckURL = "http://www.myserver.com/adminconsole/healthcheck";
         _adminApiSettings.Username = "SomeUserName";
         _adminApiSettings.ClientId = "SomeClientId";
+        _adminApiSettings.ClientSecret = "SomeSecret";
         _adminApiSettings.Password = "SomePassword";
+        _adminApiSettings.Scope = "SomeScope";
+        _adminApiSettings.GrantType = "client_credentials";
     }
 
     [TestFixture]
@@ -73,17 +76,6 @@ public class Given_AdminApiSettings_provided
     }
 
     [TestFixture]
-    public class When_it_does_not_have_Username : Given_AdminApiSettings_provided
-    {
-        [Test]
-        public void should_be_invalid()
-        {
-            _adminApiSettings.Username = string.Empty;
-            AdminApiConnectioDataValidator.IsValid(_logger, _adminApiSettings).ShouldBeFalse();
-        }
-    }
-
-    [TestFixture]
     public class When_it_does_not_have_ClientId : Given_AdminApiSettings_provided
     {
         [Test]
@@ -95,12 +87,70 @@ public class Given_AdminApiSettings_provided
     }
 
     [TestFixture]
-    public class When_it_does_not_have_Password : Given_AdminApiSettings_provided
+    public class When_granttype_is_client_credentials_and_it_does_not_have_Secret : Given_AdminApiSettings_provided
     {
         [Test]
         public void should_be_invalid()
         {
+            _adminApiSettings.ClientSecret = string.Empty;
+            AdminApiConnectioDataValidator.IsValid(_logger, _adminApiSettings).ShouldBeFalse();
+        }
+    }
+
+    [TestFixture]
+    public class When_granttype_is_password_and_it_does_Username : Given_AdminApiSettings_provided
+    {
+        [Test]
+        public void should_be_invalid()
+        {
+            _adminApiSettings.GrantType = "password";
+            _adminApiSettings.Username = string.Empty;
+            AdminApiConnectioDataValidator.IsValid(_logger, _adminApiSettings).ShouldBeFalse();
+        }
+    }
+
+    [TestFixture]
+    public class When_granttype_is_password_and_it_does_Password : Given_AdminApiSettings_provided
+    {
+        [Test]
+        public void should_be_invalid()
+        {
+            _adminApiSettings.GrantType = "password";
             _adminApiSettings.Password = string.Empty;
+            AdminApiConnectioDataValidator.IsValid(_logger, _adminApiSettings).ShouldBeFalse();
+        }
+    }
+
+    [TestFixture]
+    public class When_it_does_not_have_Secret_and_does_not_have_Password : Given_AdminApiSettings_provided
+    {
+        [Test]
+        public void should_be_invalid()
+        {
+            _adminApiSettings.ClientSecret = string.Empty;
+            _adminApiSettings.Password = string.Empty;
+            AdminApiConnectioDataValidator.IsValid(_logger, _adminApiSettings).ShouldBeFalse();
+        }
+    }
+
+    [TestFixture]
+    public class When_it_does_not_have_GrandType : Given_AdminApiSettings_provided
+    {
+        [Test]
+        public void should_be_invalid()
+        {
+            _adminApiSettings.GrantType = string.Empty;
+            AdminApiConnectioDataValidator.IsValid(_logger, _adminApiSettings).ShouldBeFalse();
+        }
+    }
+
+    [TestFixture]
+    public class When_it_does_not_have_Scope : Given_AdminApiSettings_provided
+    {
+        [Test]
+        public void should_be_invalid()
+        {
+            _adminApiSettings.Scope = string.Empty;
             AdminApiConnectioDataValidator.IsValid(_logger, _adminApiSettings).ShouldBeFalse();
         }
     }

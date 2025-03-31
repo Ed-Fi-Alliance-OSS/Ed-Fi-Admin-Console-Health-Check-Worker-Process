@@ -22,14 +22,31 @@ public static class AdminApiConnectioDataValidator
         if (string.IsNullOrEmpty(adminApiSettings.AdminConsoleHealthCheckURL))
             messages.Add("AdminConsoleHealthCheckURL is required.");
 
-        if (string.IsNullOrEmpty(adminApiSettings.Username))
-            messages.Add("Username is required.");
-
         if (string.IsNullOrEmpty(adminApiSettings.ClientId))
             messages.Add("ClientId is required.");
 
-        if (string.IsNullOrEmpty(adminApiSettings.Password))
-            messages.Add("Password is required.");
+        if (string.IsNullOrEmpty(adminApiSettings.Scope))
+            messages.Add("Scope is required.");
+
+        if (string.IsNullOrEmpty(adminApiSettings.GrantType))
+            messages.Add("GrantType is required.");
+        else
+        {
+            if (adminApiSettings.GrantType.Equals("client_credentials", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(adminApiSettings.ClientSecret))
+                    messages.Add("Client Secret is required.");
+            }
+            else if (adminApiSettings.GrantType.Equals("password", StringComparison.OrdinalIgnoreCase))
+            {
+
+                if (string.IsNullOrEmpty(adminApiSettings.Username))
+                    messages.Add("Username is required.");
+
+                if (string.IsNullOrEmpty(adminApiSettings.Password))
+                    messages.Add("Password is required.");
+            }
+        }
 
         if (messages != null && messages.Count > 0)
         {
