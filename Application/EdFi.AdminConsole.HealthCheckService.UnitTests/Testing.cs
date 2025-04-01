@@ -3,49 +3,55 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using EdFi.AdminConsole.HealthCheckService;
 using EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 using EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 using Microsoft.Extensions.Options;
 
-namespace EdFi.Ods.AdminApi.HealthCheckService.UnitTests;
+namespace EdFi.AdminConsole.HealthCheckService.UnitTests;
 
 public class Testing
 {
     public static IOptions<AppSettings> GetAppSettings()
     {
-        AppSettings appSettings = new AppSettings();
-        IOptions<AppSettings> options = Options.Create(appSettings);
+        IOptions<AppSettings> options = Options.Create(new AppSettings());
         return options;
     }
 
     public static IOptions<AdminApiSettings> GetAdminApiSettings()
     {
-        AdminApiSettings adminApiSettings = new AdminApiSettings();
-        adminApiSettings.AccessTokenUrl = "http://www.myserver.com/token";
-        adminApiSettings.ApiUrl = "http://www.myserver.com";
-        adminApiSettings.AdminConsoleInstancesURI = "/adminconsole/instances";
-        adminApiSettings.AdminConsoleHealthCheckURI = "/adminconsole/healthcheck";
-        IOptions<AdminApiSettings> options = Options.Create(adminApiSettings);
-        return options;
+        return Options.Create(new AdminApiSettings()
+        {
+            AccessTokenUrl = "http://www.myserver.com/token",
+            AdminConsoleTenantsURL = "http://www.myserver.com/adminconsole/tenants",
+            AdminConsoleInstancesURL = "http://www.myserver.com/adminconsole/instances",
+            AdminConsoleHealthCheckURL = "http://www.myserver.com/adminconsole/healthcheck",
+            Username = "SomeUsername",
+            ClientId = "SomeClient",
+            ClientSecret = "SomeClientSecret",
+            Password = "SomePassword",
+            GrantType = "GrantType",
+            Scope = "Scope"
+        });
     }
 
     public static IOptions<OdsApiSettings> GetOdsApiSettings()
     {
-        OdsApiSettings odsApiSettings = new OdsApiSettings();
-        odsApiSettings.Endpoints = Endpoints;
+        OdsApiSettings odsApiSettings = new()
+        {
+            Endpoints = Endpoints
+        };
         IOptions<OdsApiSettings> options = Options.Create(odsApiSettings);
         return options;
     }
 
-    public static List<string> Endpoints { get { return new List<string> { "ed-fi/firstEndPoint", "ed-fi/secondEndpoint", "ed-fi/thirdEndPoint" }; } }
+    public static List<string> Endpoints { get { return ["ed-fi/firstEndPoint", "ed-fi/secondEndpoint", "ed-fi/thirdEndPoint"]; } }
 
     public static List<OdsApiEndpointNameCount> HealthCheckData
     {
         get
         {
-            return new List<OdsApiEndpointNameCount>
-            {
+            return
+            [
                 new OdsApiEndpointNameCount()
                 {
                     OdsApiEndpointName = "ed-fi/firstEndPoint",
@@ -64,21 +70,67 @@ public class Testing
                     OdsApiEndpointCount = 5,
                     AnyErrros = false
                 }
-            };
+            ];
         }
     }
 
-    public static List<AdminApiInstance> AdminApiInstances
+    public static List<AdminConsoleTenant> AdminApiTenants
     {
         get
         {
-            return new List<AdminApiInstance>
-            {
-                new AdminApiInstance()
+            return
+            [
+                new()
                 {
-                    InstanceId = 1,
+                    TenantId = 1,
+                    Document = new AdminConsoleTenantDocument()
+                    {
+                        EdfiApiDiscoveryUrl = "https://api.ed-fi.org/v7.1/api6/",
+                        Name = "tenant1",
+                    }
+                },
+                new()
+                {
+                    TenantId = 2,
+                    Document = new AdminConsoleTenantDocument()
+                    {
+                        EdfiApiDiscoveryUrl = "https://api.ed-fi.org/v7.2/api6/",
+                        Name = "tenant2",
+                    }
+                }
+            ];
+        }
+    }
+
+    public const string Tenants =
+    @"[{
+        ""TenantId"": 1,
+        ""Document"":
+        {
+            ""EdfiApiDiscoveryUrl"": ""https://api.ed-fi.org/v7.1/api6/"",
+            ""Name"" : ""tenant1""
+        }
+      },{
+        ""TenantId"": 2,
+        ""Document"":
+        {
+            ""EdfiApiDiscoveryUrl"": ""https://api.ed-fi.org/v7.2/api6/"",
+            ""Name"" : ""tenant2""
+        }
+    }]";
+
+    public static List<AdminConsoleInstance> AdminApiInstances
+    {
+        get
+        {
+            return
+            [
+                new()
+                {
+                    Id = 1,
                     OdsInstanceId = 1,
                     TenantId = 1,
+                    TenantName = "tenant1",
                     InstanceName = "instance 1",
                     ClientId = "one client",
                     ClientSecret = "one secret",
@@ -86,11 +138,12 @@ public class Testing
                     ResourceUrl = "http://www.myserver.com/data/v3",
                     Status = "Completed",
                 },
-                new AdminApiInstance()
+                new()
                 {
-                    InstanceId = 2,
+                    Id = 2,
                     OdsInstanceId = 2,
-                    TenantId = 2,
+                    TenantId = 1,
+                    TenantName = "tenant1",
                     InstanceName = "instance 2",
                     ClientId = "another client",
                     ClientSecret = "another secret",
@@ -98,15 +151,16 @@ public class Testing
                     ResourceUrl = "http://www.myserver.com/data/v3",
                     Status = "Completed",
                 }
-            };
+            ];
         }
     }
 
     public const string Instances =
     @"[{
-        ""instanceId"": 1,
+        ""id"": 1,
         ""odsInstanceId"": 1,
         ""tenantId"": 1,
+        ""tenantName"": ""tenant1"",
         ""instanceName"": ""instance 1"",
         ""clientId"": ""one client"",
         ""clientSecret"": ""one secret"",
@@ -114,9 +168,10 @@ public class Testing
         ""oauthUrl"": ""http://www.myserver.com/connect/token"",
         ""status"": ""Completed""
       },{
-        ""instanceId"": 2,
+        ""id"": 2,
         ""odsInstanceId"": 2,
-        ""tenantId"": 2,
+        ""tenantId"": 1,
+        ""tenantName"": ""tenant1"",
         ""instanceName"": ""instance 2"",
         ""clientId"": ""another client"",
         ""clientSecret"": ""another secret"",
@@ -124,42 +179,4 @@ public class Testing
         ""oauthUrl"": ""http://www.myserver.com/connect/token"",
         ""status"": ""Completed""
     }]";
-
-
-    public static Dictionary<string, string?> CommandArgsDicWithMultitenant = new Dictionary<string, string?>
-        {
-            {"isMultiTenant", "true"},
-            {"tenant", "Tenant1"},
-            {"clientid", "SomeClientId"},
-            {"clientsecret", "SomeClientSecret"}
-        };
-
-    public static Dictionary<string, string?> CommandArgsDicWithSingletenant = new Dictionary<string, string?>
-        {
-            {"isMultiTenant", "false"},
-            {"clientid", "SomeClientId"},
-            {"clientsecret", "SomeClientSecret"}
-        };
-
-    public static Dictionary<string, string?> CommandArgsDicNoClientId = new Dictionary<string, string?>
-        {
-            {"isMultiTenant", "false"},
-            {"clientid", ""},
-            {"clientsecret", "SomeClientSecret"}
-        };
-
-    public static Dictionary<string, string?> CommandArgsDicNoClientSecret = new Dictionary<string, string?>
-        {
-            {"isMultiTenant", "false"},
-            {"clientid", "SomeClientId"},
-            {"clientsecret", ""}
-        };
-
-    public static Dictionary<string, string?> CommandArgsDicWithMultitenantNoTenant = new Dictionary<string, string?>
-        {
-            {"isMultiTenant", "true"},
-            {"tenant", ""},
-            {"clientid", "SomeClientId"},
-            {"clientsecret", "SomeClientSecret"}
-        };
 }

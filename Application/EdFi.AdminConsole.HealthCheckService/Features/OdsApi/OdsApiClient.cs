@@ -15,13 +15,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 
 public interface IOdsApiClient
 {
-    Task<ApiResponse> OdsApiGet(
-        string authenticationUrl,
-        string clientId,
-        string clientSecret,
-        string odsEndpointUrl,
-        string getInfo
-    );
+    Task<ApiResponse> OdsApiGet(string authenticationUrl, string clientId, string clientSecret, string odsEndpointUrl);
 }
 
 public class OdsApiClient : IOdsApiClient
@@ -48,8 +42,7 @@ public class OdsApiClient : IOdsApiClient
         string authenticationUrl,
         string clientId,
         string clientSecret,
-        string odsEndpointUrl,
-        string getInfo
+        string odsEndpointUrl
     )
     {
         ApiResponse response = new ApiResponse(HttpStatusCode.InternalServerError, string.Empty);

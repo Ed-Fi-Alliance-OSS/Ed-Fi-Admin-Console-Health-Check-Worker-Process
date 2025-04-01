@@ -14,7 +14,7 @@ namespace EdFi.Ods.AdminApi.HealthCheckService.UnitTests.Helpers;
 
 public class Given_an_instance_returned_from_AdminApi
 {
-    private AdminApiInstance _instance = new AdminApiInstance();
+    private AdminConsoleInstance _instance = new AdminConsoleInstance();
     private ILogger<Given_an_instance_returned_from_AdminApi> _logger;
 
     [SetUp]
@@ -26,7 +26,7 @@ public class Given_an_instance_returned_from_AdminApi
         _instance.ResourceUrl = "Some url";
         _instance.ClientId = "Some url";
         _instance.ClientSecret = "Some url";
-        _instance.InstanceId = 1;
+        _instance.Id = 1;
         _instance.TenantId = 1;
         _instance.InstanceName = "Some url";
     }
