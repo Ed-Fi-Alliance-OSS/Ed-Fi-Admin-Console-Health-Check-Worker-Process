@@ -86,7 +86,7 @@ public partial class Given_an_admin_api
             instances.First().InstanceName.ShouldBe("instance 1");
             instances.First().ClientId.ShouldBe("one client");
             instances.First().ClientSecret.ShouldBe("one secret");
-            instances.First().ResourceUrl.ShouldBe("http://www.myserver.com/data/v3");
+            instances.First().ResourceUrl.ShouldBe("http://www.myserver.com/data/v3/");
             instances.First().OauthUrl.ShouldBe("http://www.myserver.com/connect/token");
             instances.First().Status.ShouldBe("Completed");
 
@@ -97,7 +97,7 @@ public partial class Given_an_admin_api
             instances.ElementAt(1).InstanceName.ShouldBe("instance 2");
             instances.ElementAt(1).ClientId.ShouldBe("another client");
             instances.ElementAt(1).ClientSecret.ShouldBe("another secret");
-            instances.ElementAt(1).ResourceUrl.ShouldBe("http://www.myserver.com/data/v3");
+            instances.ElementAt(1).ResourceUrl.ShouldBe("http://www.myserver.com/data/v3/");
             instances.ElementAt(1).OauthUrl.ShouldBe("http://www.myserver.com/connect/token");
             instances.ElementAt(1).Status.ShouldBe("Completed");
         }

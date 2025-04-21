@@ -25,8 +25,7 @@ public class OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettin
 
         foreach (var appSettingsOdsApiEndpoint in _appSettingsOdsApiEndpoints)
         {
-            instance.ResourceUrl = instance.ResourceUrl.EndsWith('/') ? instance.ResourceUrl.TrimEnd('/') : instance.ResourceUrl;
-            var odsResourceEndpointUrl = $"{instance.ResourceUrl}/{appSettingsOdsApiEndpoint}{Constants.OdsApiQueryParams}";
+            var odsResourceEndpointUrl = $"{instance.ResourceUrl}{Constants.EdFiUri}/{appSettingsOdsApiEndpoint}{Constants.OdsApiQueryParams}";
 
             tasks.Add(Task.Run(() => GetCountPerEndpointAsync(
                 appSettingsOdsApiEndpoint, instance.OauthUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));
