@@ -44,7 +44,7 @@ public class Testing
         return options;
     }
 
-    public static List<string> Endpoints { get { return ["ed-fi/firstEndPoint", "ed-fi/secondEndpoint", "ed-fi/thirdEndPoint"]; } }
+    public static List<string> Endpoints { get { return ["firstEndPoint", "secondEndpoint", "thirdEndPoint"]; } }
 
     public static List<OdsApiEndpointNameCount> HealthCheckData
     {
@@ -54,19 +54,19 @@ public class Testing
             [
                 new OdsApiEndpointNameCount()
                 {
-                    OdsApiEndpointName = "ed-fi/firstEndPoint",
+                    OdsApiEndpointName = "firstEndPoint",
                     OdsApiEndpointCount = 3,
                     AnyErrros = false
                 },
                 new OdsApiEndpointNameCount()
                 {
-                    OdsApiEndpointName = "ed-fi/secondEndpoint",
+                    OdsApiEndpointName = "secondEndpoint",
                     OdsApiEndpointCount = 8,
                     AnyErrros = false
                 },
                 new OdsApiEndpointNameCount()
                 {
-                    OdsApiEndpointName = "ed-fi/thirdEndPoint",
+                    OdsApiEndpointName = "thirdEndPoint",
                     OdsApiEndpointCount = 5,
                     AnyErrros = false
                 }
@@ -135,7 +135,7 @@ public class Testing
                     ClientId = "one client",
                     ClientSecret = "one secret",
                     OauthUrl = "http://www.myserver.com/connect/token",
-                    ResourceUrl = "http://www.myserver.com/data/v3",
+                    ResourceUrl = "http://www.myserver.com/data/v3/",
                     Status = "Completed",
                 },
                 new()
@@ -148,7 +148,7 @@ public class Testing
                     ClientId = "another client",
                     ClientSecret = "another secret",
                     OauthUrl = "http://www.myserver.com/connect/token",
-                    ResourceUrl = "http://www.myserver.com/data/v3",
+                    ResourceUrl = "http://www.myserver.com/data/v3/",
                     Status = "Completed",
                 }
             ];
@@ -164,7 +164,7 @@ public class Testing
         ""instanceName"": ""instance 1"",
         ""clientId"": ""one client"",
         ""clientSecret"": ""one secret"",
-        ""resourceUrl"": ""http://www.myserver.com/data/v3"",
+        ""resourceUrl"": ""http://www.myserver.com/data/v3/"",
         ""oauthUrl"": ""http://www.myserver.com/connect/token"",
         ""status"": ""Completed""
       },{
@@ -175,7 +175,7 @@ public class Testing
         ""instanceName"": ""instance 2"",
         ""clientId"": ""another client"",
         ""clientSecret"": ""another secret"",
-        ""resourceUrl"": ""http://www.myserver.com/data/v3"",
+        ""resourceUrl"": ""http://www.myserver.com/data/v3/"",
         ""oauthUrl"": ""http://www.myserver.com/connect/token"",
         ""status"": ""Completed""
     }]";

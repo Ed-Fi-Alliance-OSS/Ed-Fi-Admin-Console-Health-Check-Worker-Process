@@ -14,7 +14,7 @@ public interface IOdsApiCaller
     Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminConsoleInstance instance);
 }
 
-public class OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints) : IOdsApiCaller
+public class OdsApiCaller(IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints) : IOdsApiCaller
 {
     private readonly IOdsApiClient _odsApiClient = odsApiClient;
     private readonly IAppSettingsOdsApiEndpoints _appSettingsOdsApiEndpoints = appSettingsOdsApiEndpoints;
@@ -25,8 +25,7 @@ public class OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettin
 
         foreach (var appSettingsOdsApiEndpoint in _appSettingsOdsApiEndpoints)
         {
-            instance.ResourceUrl = instance.ResourceUrl.EndsWith('/') ? instance.ResourceUrl.TrimEnd('/') : instance.ResourceUrl;
-            var odsResourceEndpointUrl = $"{instance.ResourceUrl}/{appSettingsOdsApiEndpoint}{Constants.OdsApiQueryParams}";
+            var odsResourceEndpointUrl = $"{instance.ResourceUrl}{Constants.EdFiUri}/{appSettingsOdsApiEndpoint}{Constants.OdsApiQueryParams}";
 
             tasks.Add(Task.Run(() => GetCountPerEndpointAsync(
                 appSettingsOdsApiEndpoint, instance.OauthUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));

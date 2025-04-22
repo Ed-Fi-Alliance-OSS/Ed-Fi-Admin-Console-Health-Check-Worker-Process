@@ -14,5 +14,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Helpers
         public const string TenantHeader = "tenant";
 
         public const string CompletedInstances = "?status=Completed";
+
+        public const string EdFiUri = "ed-fi";
     }
 }
