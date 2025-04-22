@@ -14,7 +14,7 @@ public interface IOdsApiCaller
     Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminConsoleInstance instance);
 }
 
-public class OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints) : IOdsApiCaller
+public class OdsApiCaller(IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints) : IOdsApiCaller
 {
     private readonly IOdsApiClient _odsApiClient = odsApiClient;
     private readonly IAppSettingsOdsApiEndpoints _appSettingsOdsApiEndpoints = appSettingsOdsApiEndpoints;

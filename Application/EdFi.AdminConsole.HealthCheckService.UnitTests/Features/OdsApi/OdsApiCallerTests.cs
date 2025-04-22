@@ -19,15 +19,12 @@ public class Given_an_ods_api
     [TestFixture]
     public class When_HealthCheckData_is_returned_from_api : Given_an_ods_api
     {
-        private ILogger<Given_an_ods_api> _logger;
         private IOdsApiClient _odsApiClient;
         private OdsApiCaller _odsApiCaller;
 
         [SetUp]
         public void SetUp()
         {
-            _logger = A.Fake<ILogger<Given_an_ods_api>>();
-
             _odsApiClient = A.Fake<IOdsApiClient>();
 
             var adminApiInstance = Testing.AdminApiInstances.First();
@@ -50,7 +47,7 @@ public class Given_an_ods_api
             A.CallTo(() => _odsApiClient.OdsApiGet(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, "http://www.myserver.com/data/v3/ed-fi/thirdEndPoint?offset=0&limit=0&totalCount=true"))
                 .Returns(new ApiResponse(HttpStatusCode.OK, string.Empty, httpResponse3.Headers));
 
-            _odsApiCaller = new OdsApiCaller(_logger, _odsApiClient, new AppSettingsOdsApiEndpoints(Testing.GetOdsApiSettings()));
+            _odsApiCaller = new OdsApiCaller(_odsApiClient, new AppSettingsOdsApiEndpoints(Testing.GetOdsApiSettings()));
         }
 
         [Test]
