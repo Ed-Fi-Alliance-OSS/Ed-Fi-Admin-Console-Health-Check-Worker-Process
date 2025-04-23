@@ -13,15 +13,15 @@ on:
     branches:
       - main
     paths:
-      - "Application/**"
-      - ".github/**"
+      - "Application/**/*"
+      - ".github/**/*"
   workflow_dispatch:
 
-permissions:
-  security-events: write
+permissions: read-all
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   scan-actions-bidi:
@@ -30,13 +30,13 @@ jobs:
     with:
       config-file-path: ./.github/workflows/bidi-config.json
 
-  scan-actions:
-    name: Scan Actions
-    uses: ed-fi-alliance-oss/ed-fi-actions/.github/workflows/repository-scanner.yml@main
-
   analyze-code:
     name: Analyze Code
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     defaults:
       run:
         shell: pwsh
@@ -50,7 +50,7 @@ jobs:
 
       - name: Initialize CodeQL
         if: success()
-        uses: github/codeql-action/init@cf7e9f23492505046de9a37830c3711dd0f25bb3 # codeql-bundle-v2.16.2
+        uses: github/codeql-action/init@1b549b9259bda1cb5ddde3b41741a82a2d15a841 # v3.28.13
         with:
           languages: csharp
 
@@ -59,11 +59,15 @@ jobs:
 
       - name: Perform CodeQL Analysis
         if: success()
-        uses: github/codeql-action/analyze@cf7e9f23492505046de9a37830c3711dd0f25bb3 # codeql-bundle-v2.16.2
+        uses: github/codeql-action/analyze@1b549b9259bda1cb5ddde3b41741a82a2d15a841 # v3.28.13
 
   event_file:
-    name: "Event File"
+    name: Upload event file
     runs-on: ubuntu-latest
+    needs:
+      - scan-actions-bidi
+      - analyze-code
+    if: always()
     steps:
       - name: Upload
         uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8 # v4.3.0
