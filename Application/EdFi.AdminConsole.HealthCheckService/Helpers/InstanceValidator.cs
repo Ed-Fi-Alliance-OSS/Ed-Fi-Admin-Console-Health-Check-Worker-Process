@@ -10,7 +10,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Helpers;
 
 public static class InstanceValidator
 {
-    public static bool IsInstanceValid(ILogger logger, AdminApiInstanceDocument instance)
+    public static bool IsInstanceValid(ILogger logger, AdminConsoleInstance instance)
     {
         var messages = new List<string>();
 
@@ -18,14 +18,11 @@ public static class InstanceValidator
             messages.Add("instance cannot be empty.");
         else
         {
-            if (string.IsNullOrEmpty(instance.BaseUrl))
-                messages.Add("BaseUrl is required.");
-
-            if (string.IsNullOrEmpty(instance.AuthenticationUrl))
+            if (string.IsNullOrEmpty(instance.OauthUrl))
                 messages.Add("AuthenticationUrl is required.");
 
-            if (string.IsNullOrEmpty(instance.ResourcesUrl))
-                messages.Add("ResourcesUrl is required.");
+            if (string.IsNullOrEmpty(instance.ResourceUrl))
+                messages.Add("ResourceUrl is required.");
 
             if (string.IsNullOrEmpty(instance.ClientId))
                 messages.Add("ClientId is required.");
@@ -36,8 +33,8 @@ public static class InstanceValidator
 
         if (messages != null && messages.Count > 0)
         {
-            string concatenatedMessages = String.Concat(messages);
-            logger.LogWarning($"The instance obtained from Admin API is not properly formed. {concatenatedMessages}");
+            string concatenatedMessages = string.Concat(messages);
+            logger.LogWarning("The instance {Name} obtained from Admin API is not properly formed. {Messages}", instance?.InstanceName, concatenatedMessages);
             return false;
         }
 

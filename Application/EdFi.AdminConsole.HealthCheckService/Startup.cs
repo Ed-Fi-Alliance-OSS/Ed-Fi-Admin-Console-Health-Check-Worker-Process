@@ -3,7 +3,6 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using EdFi.AdminConsole.HealthCheckService.Features;
 using EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 using EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
@@ -26,13 +25,13 @@ public static class Startup
         services.Configure<AdminApiSettings>(configuration.GetSection("AdminApiSettings"));
         services.Configure<OdsApiSettings>(configuration.GetSection("OdsApiSettings"));
 
-        services.AddSingleton<ILogger>();
+#pragma warning disable CS8603 // Possible null reference return.
+        services.AddSingleton<ILogger>(sp => sp.GetService<ILogger<Application>>());
+#pragma warning restore CS8603 // Possible null reference return.
 
         services.AddSingleton<IAppSettingsOdsApiEndpoints, AppSettingsOdsApiEndpoints>();
-        services.AddSingleton<ICommandArgs, CommandArgs>();
 
         services.AddTransient<IHttpRequestMessageBuilder, HttpRequestMessageBuilder>();
-        services.AddTransient<IOdsResourceEndpointUrlBuilder, OdsResourceEndpointUrlBuilder>();
 
         services.AddTransient<IAdminApiClient, AdminApiClient>();
         services.AddTransient<IOdsApiClient, OdsApiClient>();
@@ -42,16 +41,12 @@ public static class Startup
 
         services.AddTransient<IHostedService, Application>();
 
-        //services.AddTransient<IAdminApiClientNew, AdminApiClient>();
-
-        //services.AddHttpClient<IAppHttpClient, AppHttpClient>();
-
         services
             .AddHttpClient<IAppHttpClient, AppHttpClient>(
                 "AppHttpClient",
                 x =>
                 {
-                    x.Timeout = TimeSpan.FromSeconds(5);
+                    x.Timeout = TimeSpan.FromSeconds(500);
                 }
             )
             .ConfigurePrimaryHttpMessageHandler(() =>
@@ -73,17 +68,21 @@ public static class Startup
 
     private static HttpClientHandler IgnoresCertificateErrorsHandler()
     {
-        var handler = new HttpClientHandler();
-        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-        handler.ServerCertificateCustomValidationCallback = (
-            httpRequestMessage,
-            cert,
-            cetChain,
-            policyErrors
-        ) =>
+        var handler = new HttpClientHandler
         {
-            return true;
+            ClientCertificateOptions = ClientCertificateOption.Manual,
+#pragma warning disable S4830 // Server certificates should be verified during SSL/TLS connections
+            ServerCertificateCustomValidationCallback = (
+                httpRequestMessage,
+                cert,
+                cetChain,
+                policyErrors
+            ) =>
+            {
+                return true;
+            }
         };
+#pragma warning restore S4830
 
         return handler;
     }

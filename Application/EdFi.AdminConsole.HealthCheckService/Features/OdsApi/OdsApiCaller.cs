@@ -5,45 +5,30 @@
 
 using EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
 using EdFi.AdminConsole.HealthCheckService.Helpers;
-using EdFi.AdminConsole.HealthCheckService.Infrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.OdsApi;
 
 public interface IOdsApiCaller
 {
-    Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminApiInstanceDocument instance);
+    Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminConsoleInstance instance);
 }
 
-public class OdsApiCaller : IOdsApiCaller
+public class OdsApiCaller(IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints) : IOdsApiCaller
 {
-    private readonly ILogger _logger;
-    private IOdsApiClient _odsApiClient;
-    private IAppSettingsOdsApiEndpoints _appSettingsOdsApiEndpoints;
-    private readonly ICommandArgs _commandArgs;
-    private IOdsResourceEndpointUrlBuilder _odsResourceEndpointUrlBuilder;
+    private readonly IOdsApiClient _odsApiClient = odsApiClient;
+    private readonly IAppSettingsOdsApiEndpoints _appSettingsOdsApiEndpoints = appSettingsOdsApiEndpoints;
 
-    public OdsApiCaller(ILogger logger, IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoints appSettingsOdsApiEndpoints, ICommandArgs commandArgs, IOdsResourceEndpointUrlBuilder odsResourceEndpointUrlBuilder)
-    {
-        _logger = logger;
-        _odsApiClient = odsApiClient;
-        _appSettingsOdsApiEndpoints = appSettingsOdsApiEndpoints;
-        _commandArgs = commandArgs;
-        _odsResourceEndpointUrlBuilder = odsResourceEndpointUrlBuilder;
-    }
-
-    public async Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminApiInstanceDocument instance)
+    public async Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminConsoleInstance instance)
     {
         var tasks = new List<Task<OdsApiEndpointNameCount>>();
 
         foreach (var appSettingsOdsApiEndpoint in _appSettingsOdsApiEndpoints)
         {
-            var odsResourceEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsResourceEndpointUrl(instance.BaseUrl, $"{instance.ResourcesUrl}{appSettingsOdsApiEndpoint}");
-
-            var odsAuthEndpointUrl = _odsResourceEndpointUrlBuilder.GetOdsAuthEndpointUrl(instance.BaseUrl, instance.AuthenticationUrl);
+            var odsResourceEndpointUrl = $"{instance.ResourceUrl}{Constants.EdFiUri}/{appSettingsOdsApiEndpoint}{Constants.OdsApiQueryParams}";
 
             tasks.Add(Task.Run(() => GetCountPerEndpointAsync(
-                appSettingsOdsApiEndpoint, odsAuthEndpointUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));
+                appSettingsOdsApiEndpoint, instance.OauthUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));
         }
 
         return (await Task.WhenAll(tasks)).ToList();
@@ -55,7 +40,7 @@ public class OdsApiCaller : IOdsApiCaller
         {
             OdsApiEndpointName = odsApiEndpoint,
         };
-        var response = await _odsApiClient.OdsApiGet(authUrl, clientId, clientSecret, odsEndpointUrl, "Get HealthCheck data from Ods Api");
+        var response = await _odsApiClient.OdsApiGet(authUrl, clientId, clientSecret, odsEndpointUrl);
 
         if (response != null && response.StatusCode == System.Net.HttpStatusCode.OK && response.Headers != null && response.Headers.Contains(Constants.TotalCountHeader))
             result.OdsApiEndpointCount = int.Parse(response.Headers.GetValues(Constants.TotalCountHeader).First());

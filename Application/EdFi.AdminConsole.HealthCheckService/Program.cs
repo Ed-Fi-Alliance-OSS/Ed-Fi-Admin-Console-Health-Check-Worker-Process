@@ -3,17 +3,15 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using EdFi.AdminConsole.HealthCheckService;
 using EdFi.AdminConsole.HealthCheckService.Logging;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.CommandLine;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Reflection;
 
-public class Program
+namespace EdFi.AdminConsole.HealthCheckService;
+
+public static class Program
 {
     public static async Task Main(string[] args)
     {
@@ -29,7 +27,7 @@ public class Program
         }
         finally
         {
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 
@@ -44,14 +42,14 @@ public class Program
 
         using var builtHost = host.Build();
 
-        var cancellationTokenSource = new CancellationTokenSource();
+        using var cancellationTokenSource = new CancellationTokenSource();
 
         var assembly = Assembly.GetExecutingAssembly();
         var informationalVersion = assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             ?.InformationalVersion;
 
-        Log.Information("{name} {version} Starting", assembly.GetName().Name, informationalVersion);
+        Log.Information("{Name} {Version} Starting", assembly.GetName().Name, informationalVersion);
 
         Log.Information("Starting host");
         await builtHost.StartAsync(cancellationTokenSource.Token);
@@ -65,13 +63,12 @@ public class Program
         var runPath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
         var loggingConfigFile = Path.Combine(runPath ?? "./", "logging.json");
         var env = context.HostingEnvironment;
-        //config.Sources.Clear();
 
         config
             .AddJsonFile(loggingConfigFile, optional: false)
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
-        config.AddEnvironmentVariables();
+        config.AddEnvironmentVariables(prefix: "EdFi_AdminConsole_");
     }
 }

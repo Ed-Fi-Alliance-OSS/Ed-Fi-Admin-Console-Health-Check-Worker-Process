@@ -16,7 +16,7 @@ public static class JsonBuilder
 
         if (healthCheckData != null)
         {
-            healthCheckDocument.Add(new KeyValuePair<string, JsonNode?>("healthy", !healthCheckData.Any(r => r.AnyErrros == true)));
+            healthCheckDocument.Add(new KeyValuePair<string, JsonNode?>("healthy", !healthCheckData.Any(r => r.AnyErrros)));
             foreach (var countPerEndpoint in healthCheckData)
             {
                 healthCheckDocument.Add(new KeyValuePair<string, JsonNode?>(countPerEndpoint.OdsApiEndpointName, countPerEndpoint.OdsApiEndpointCount));

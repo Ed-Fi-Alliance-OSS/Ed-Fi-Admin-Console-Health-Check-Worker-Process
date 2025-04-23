@@ -3,9 +3,6 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
-using EdFi.AdminConsole.HealthCheckService.Features;
-using EdFi.AdminConsole.HealthCheckService.Helpers;
-
 namespace EdFi.AdminConsole.HealthCheckService.Infrastructure;
 
 public interface IHttpRequestMessageBuilder
@@ -17,13 +14,6 @@ public interface IHttpRequestMessageBuilder
 
 public class HttpRequestMessageBuilder : IHttpRequestMessageBuilder
 {
-    private readonly ICommandArgs _commandArgs;
-
-    public HttpRequestMessageBuilder(ICommandArgs commandArgs)
-    {
-        _commandArgs = commandArgs;
-    }
-
     public HttpRequestMessage GetHttpRequestMessage(string uriString, HttpMethod method, StringContent? content)
     {
         var request = new HttpRequestMessage()
@@ -32,9 +22,6 @@ public class HttpRequestMessageBuilder : IHttpRequestMessageBuilder
             Method = method,
             Content = content
         };
-
-        if (_commandArgs.IsMultiTenant)
-            request.Headers.Add(Constants.TenantHeader, _commandArgs.Tenant);
 
         return request;
     }
@@ -47,9 +34,6 @@ public class HttpRequestMessageBuilder : IHttpRequestMessageBuilder
             Method = method,
             Content = content
         };
-
-        if (_commandArgs.IsMultiTenant)
-            request.Headers.Add(Constants.TenantHeader, _commandArgs.Tenant);
 
         return request;
     }
