@@ -16,7 +16,7 @@ public interface IAdminApiCaller
 {
     Task<IEnumerable<AdminConsoleTenant>> GetTenantsAsync();
     Task<IEnumerable<AdminConsoleInstance>> GetInstancesAsync(string? tenant);
-    Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData, string? tenant);
+    Task PostHealthCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData, string? tenant);
 }
 
 public class AdminApiCaller(ILogger logger, IAdminApiClient adminApiClient, IOptions<AdminApiSettings> adminApiOptions) : IAdminApiCaller
@@ -102,11 +102,9 @@ public class AdminApiCaller(ILogger logger, IAdminApiClient adminApiClient, IOpt
         }
     }
 
-    public async Task PostHealCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData, string? tenant)
+    public async Task PostHealthCheckAsync(AdminApiHealthCheckPost instanceHealthCheckData, string? tenant)
     {
-        var instanceHealthCheckDataJson = System.Text.Json.JsonSerializer.Serialize(instanceHealthCheckData);
-
-        var response = await _adminApiClient.AdminApiPost(_adminApiOptions.AdminConsoleHealthCheckURL, instanceHealthCheckDataJson, tenant);
+        var response = await _adminApiClient.AdminApiPost(_adminApiOptions.AdminConsoleHealthCheckURL, tenant, instanceHealthCheckData);
 
         if (response.StatusCode is not System.Net.HttpStatusCode.Created and not System.Net.HttpStatusCode.OK)
         {
