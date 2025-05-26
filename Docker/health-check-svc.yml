@@ -10,6 +10,7 @@ services:
       dockerfile: Docker/Dockerfile
     environment:
       EdFi_AdminConsole_AppSettings__IgnoresCertificateErrors: true
+      EdFi_AdminConsole_AppSettings__MaxRetryAttempts: ${MAX_RETRY_ATTEMPTS:-5}
       EdFi_AdminConsole_AdminApiSettings__AccessTokenUrl: ${ACCESS_TOKEN_URL:-https://host.docker.internal/auth/realms/edfi-admin-console/protocol/openid-connect/token}
       EdFi_AdminConsole_AdminApiSettings__AdminConsoleTenantsURL: ${ADMINCONSOLE_TENANTS_URL:-https://host.docker.internal/adminapi/adminconsole/tenants}
       EdFi_AdminConsole_AdminApiSettings__AdminConsoleInstancesURL: ${ADMINCONSOLE_INSTANCES_URL:-https://host.docker.internal/adminapi/adminconsole/instances?status={0}}
