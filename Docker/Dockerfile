@@ -17,6 +17,9 @@ RUN dotnet restore &&\
 
 # .NET Runtime image to execute the application
 FROM mcr.microsoft.com/dotnet/runtime:8.0.11-alpine3.20-amd64@sha256:6970cb2d1f8ba6e87d49cfb35687106f0b80c874171978b60d8962daaa8e097f AS runtime
+RUN apk --upgrade --no-cache add musl=~1.2.5-r1 openssl=~3.3.3-r0
+
+LABEL maintainer="Ed-Fi Alliance, LLC and Contributors <techsupport@ed-fi.org>"
 
 # Add cron from file and adjust permissions
 COPY crontab /etc/cron.d/container_cronjob
