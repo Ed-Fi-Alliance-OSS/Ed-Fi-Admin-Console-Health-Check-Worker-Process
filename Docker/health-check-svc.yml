@@ -23,6 +23,7 @@ services:
       EdFi_AdminConsole_AdminApiSettings__Scope: ${SCOPE:-edfi_admin_api/full_access}
     volumes:
       - service-logs:/var/log/achealthsvc
+    container_name: ed-fi-health-check-service
 
 volumes:
   service-logs:
