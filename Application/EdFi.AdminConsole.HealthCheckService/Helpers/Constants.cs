@@ -16,5 +16,7 @@ namespace EdFi.AdminConsole.HealthCheckService.Helpers
         public const string CompletedInstances = "?status=Completed";
 
         public const string EdFiUri = "ed-fi";
+
+        public const int RetryStartingDelayMilliseconds = 500;
     }
 }
