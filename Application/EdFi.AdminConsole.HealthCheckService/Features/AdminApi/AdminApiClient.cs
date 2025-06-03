@@ -10,6 +10,7 @@ using System.Text;
 using EdFi.AdminConsole.HealthCheckService.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace EdFi.AdminConsole.HealthCheckService.Features.AdminApi;
@@ -18,7 +19,7 @@ public interface IAdminApiClient
 {
     Task<ApiResponse> AdminApiGet(string url, string? tenant);
 
-    Task<ApiResponse> AdminApiPost(string url, string content, string? tenant);
+    Task<ApiResponse> AdminApiPost(string url, string? tenant, object? body = null);
 }
 
 public class AdminApiClient(
@@ -34,14 +35,11 @@ public class AdminApiClient(
 
     public async Task<ApiResponse> AdminApiGet(string url, string? tenant)
     {
-        ApiResponse response = new(HttpStatusCode.InternalServerError, string.Empty);
+        ApiResponse response = new ApiResponse(HttpStatusCode.InternalServerError, "Unknown error.");
         await GetAccessToken();
 
         if (!string.IsNullOrEmpty(_accessToken))
         {
-            const int RetryAttempts = 3;
-            var currentAttempt = 0;
-
             StringContent? content = null;
             if (!string.IsNullOrEmpty(tenant))
             {
@@ -49,50 +47,36 @@ public class AdminApiClient(
                 content.Headers.Add("tenant", tenant);
             }
 
-            while (RetryAttempts > currentAttempt)
-            {
-                response = await _appHttpClient.SendAsync(
-                    url,
-                    HttpMethod.Get,
-                    content,
-                    new AuthenticationHeaderValue("bearer", _accessToken)
-                );
-
-                currentAttempt++;
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                    break;
-            }
+            response = await _appHttpClient.SendAsync(url,
+                HttpMethod.Get,
+                content,
+                new AuthenticationHeaderValue("bearer", _accessToken)
+            );
         }
 
         return response;
     }
 
-    public async Task<ApiResponse> AdminApiPost(string url, string content, string? tenant)
+    public async Task<ApiResponse> AdminApiPost(string url, string? tenant, object? body = null)
     {
-        ApiResponse response = new(HttpStatusCode.InternalServerError, string.Empty);
+        ApiResponse response = new ApiResponse(HttpStatusCode.InternalServerError, "Unknown error.");
         await GetAccessToken();
 
-        const int RetryAttempts = 3;
-        var currentAttempt = 0;
-        while (RetryAttempts > currentAttempt)
+        if (!string.IsNullOrEmpty(_accessToken))
         {
-            var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+            StringContent? content = new StringContent(body != null ? JsonConvert.SerializeObject(body) : string.Empty, Encoding.UTF8, "application/json");
 
             if (!string.IsNullOrEmpty(tenant))
-                stringContent.Headers.Add("tenant", tenant);
+            {
+                content.Headers.Add("tenant", tenant);
+            }
 
             response = await _appHttpClient.SendAsync(
                 url,
                 HttpMethod.Post,
-                stringContent,
+                content,
                 new AuthenticationHeaderValue("bearer", _accessToken)
             );
-
-            currentAttempt++;
-
-            if (response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.OK)
-                break;
         }
 
         return response;
@@ -102,15 +86,16 @@ public class AdminApiClient(
     {
         if (string.IsNullOrEmpty(_accessToken))
         {
-            FormUrlEncodedContent content = new(
-                [
+            FormUrlEncodedContent content = new FormUrlEncodedContent(
+                new List<KeyValuePair<string, string>>
+                {
                     new("username", _adminApiOptions.Username),
                     new("client_id", _adminApiOptions.ClientId),
                     new("client_secret", _adminApiOptions.ClientSecret),
                     new("password", _adminApiOptions.Password),
                     new("grant_type", _adminApiOptions.GrantType),
                     new("scope", _adminApiOptions.Scope)
-                ]
+                }
             );
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
@@ -129,7 +114,7 @@ public class AdminApiClient(
             }
             else
             {
-                _logger.LogError("Not able to get Admin Api Access Token");
+                _logger.LogError("Not able to get Admin Api Access Token. Status Code: {0}", apiResponse.StatusCode.ToString());
             }
         }
     }

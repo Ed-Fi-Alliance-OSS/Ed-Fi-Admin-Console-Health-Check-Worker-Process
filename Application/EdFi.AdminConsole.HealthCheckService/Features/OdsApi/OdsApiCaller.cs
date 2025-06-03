@@ -21,17 +21,17 @@ public class OdsApiCaller(IOdsApiClient odsApiClient, IAppSettingsOdsApiEndpoint
 
     public async Task<List<OdsApiEndpointNameCount>> GetHealthCheckDataAsync(AdminConsoleInstance instance)
     {
-        var tasks = new List<Task<OdsApiEndpointNameCount>>();
+        var tasks = new List<OdsApiEndpointNameCount>();
 
         foreach (var appSettingsOdsApiEndpoint in _appSettingsOdsApiEndpoints)
         {
             var odsResourceEndpointUrl = $"{instance.ResourceUrl}{Constants.EdFiUri}/{appSettingsOdsApiEndpoint}{Constants.OdsApiQueryParams}";
 
-            tasks.Add(Task.Run(() => GetCountPerEndpointAsync(
-                appSettingsOdsApiEndpoint, instance.OauthUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl)));
+            tasks.Add(await GetCountPerEndpointAsync(
+                appSettingsOdsApiEndpoint, instance.OauthUrl, instance.ClientId, instance.ClientSecret, odsResourceEndpointUrl));
         }
 
-        return (await Task.WhenAll(tasks)).ToList();
+        return tasks;
     }
 
     protected async Task<OdsApiEndpointNameCount> GetCountPerEndpointAsync(string odsApiEndpoint, string authUrl, string clientId, string clientSecret, string odsEndpointUrl)

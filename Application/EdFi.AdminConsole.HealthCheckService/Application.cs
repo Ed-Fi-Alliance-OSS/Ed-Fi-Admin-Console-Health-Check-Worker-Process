@@ -63,7 +63,7 @@ public class Application(
                                 var healthCheckDocument = JsonBuilder.BuildJsonObject(healthCheckData);
 
                                 /// Step 4. Post the HealthCheck data to the Admin API
-                                var healCheckPayload = new AdminApiHealthCheckPost()
+                                var healthCheckPayload = new AdminApiHealthCheckPost()
                                 {
                                     TenantId = instance.TenantId,
                                     InstanceId = instance.Id,
@@ -72,7 +72,7 @@ public class Application(
 
                                 _logger.LogInformation("Posting HealthCheck data to Admin Api.");
 
-                                await _adminApiCaller.PostHealCheckAsync(healCheckPayload, tenantName);
+                                await _adminApiCaller.PostHealthCheckAsync(healthCheckPayload, tenantName);
                             }
                             else
                             {

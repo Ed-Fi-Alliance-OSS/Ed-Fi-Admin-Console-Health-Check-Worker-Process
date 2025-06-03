@@ -3,6 +3,7 @@
 // The Ed-Fi Alliance licenses this file to you under the Apache License, Version 2.0.
 // See the LICENSE and NOTICES files in the project root for more information.
 
+using System;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -50,22 +51,11 @@ public class OdsApiClient : IOdsApiClient
 
         if (!string.IsNullOrEmpty(_accessToken))
         {
-            const int RetryAttempts = 3;
-            var currentAttempt = 0;
-            while (RetryAttempts > currentAttempt)
-            {
-                response = await _appHttpClient.SendAsync(
-                    odsEndpointUrl,
-                    HttpMethod.Get,
-                    null as StringContent,
-                    new AuthenticationHeaderValue("bearer", _accessToken)
-                );
-
-                currentAttempt++;
-
-                if (response.StatusCode == HttpStatusCode.OK)
-                    break;
-            }
+            response = await _appHttpClient.SendAsync(odsEndpointUrl,
+                HttpMethod.Get,
+                null as StringContent,
+                new AuthenticationHeaderValue("bearer", _accessToken)
+            );
         }
 
         return response;
