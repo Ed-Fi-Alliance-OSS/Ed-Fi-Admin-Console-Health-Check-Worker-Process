@@ -5,6 +5,9 @@
 
 Import-Module -Name "$PSScriptRoot/e2eTest-helpers.psm1" -Force
 
+# Import Pester for testing (but don't auto-discover)
+Import-Module Pester -Force
+
 # Pre-Step
 Read-EnvVariables
 
@@ -68,27 +71,21 @@ if ($response.StatusCode -ne 201) {
 }
 Remove-Item -Path "$PSScriptRoot/payloads/applicationCopy.json"
 
-# 3.3 Replace key and secret on instance payload.
+# 3.3 Replace instance name to make it unique
 Copy-Item -Path "$PSScriptRoot/payloads/instance.json" -Destination "$PSScriptRoot/payloads/instanceCopy.json"
-(Get-Content $PSScriptRoot/payloads/instanceCopy.json).Replace('%key%', $response.Body.key) | Set-Content $PSScriptRoot/payloads/instanceCopy.json
-(Get-Content $PSScriptRoot/payloads/instanceCopy.json).Replace('%secret%', $response.Body.secret) | Set-Content $PSScriptRoot/payloads/instanceCopy.json
+(Get-Content $PSScriptRoot/payloads/instanceCopy.json).Replace('%InstanceName%', "$(New-Guid)") | Set-Content $PSScriptRoot/payloads/instanceCopy.json
 
 # 3.4 Create Instance
 Write-Host "Create Instance..."
-$response = Invoke-AdminApi -access_token $access_token -filePath "$PSScriptRoot/payloads/instanceCopy.json" -endpoint "instances" -adminConsoleApi $true
+$response = Invoke-AdminApi -access_token $access_token -filePath "$PSScriptRoot/payloads/instanceCopy.json" -endpoint "odsInstances" -adminConsoleApi $true
 if ($response.StatusCode -ne 201) {
     Write-Error "Not able to create instance on Admin Api - Console" -ErrorAction Stop
 }
 Remove-Item -Path "$PSScriptRoot/payloads/instanceCopy.json"
 
-# 4. Call docker to run healthcheck-cli
-Set-Location "$PSScriptRoot/../../"
-Write-Host "Build Ed-Fi-Admin-Console-Health-Check-Worker-Process..."
-docker build -f $PSScriptRoot/../../Docker/Dockerfile -t edfi.adminconsole.healthcheckservice .
-Set-Location -Path $PSScriptRoot
-
+# 4. Call Ed-Fi Admin Console Health Check Worker Process
 Write-Host "Call Ed-Fi-Admin-Console-Health-Check-Worker-Process..."
-docker run -it edfi.adminconsole.healthcheckservice --isMultiTenant=true --tenant="$env:DEFAULTTENANT" --ClientId="$env:clientId" --ClientSecret="$env:clientSecret"
+docker run --rm edfi.adminconsole.healthcheckservice dotnet EdFi.AdminConsole.HealthCheckService.dll --isMultiTenant=true --tenant="$env:DEFAULTTENANT" --ClientId="$env:clientId" --ClientSecret="$env:clientSecret"
 
 # 5. Get HealthCheck
 Write-Host "Get HealthCheck..."
@@ -99,18 +96,57 @@ if ($response.StatusCode -ne 200) {
 
 # Check if the response is an array
 Write-Host "Check response..."
-if ($response.Body -is [System.Collections.IEnumerable]) {
-    # Iterate through each item in the array
-    foreach ($healthcheckItem in $response.Body) {
-        if ($healthcheckItem.document.healthy -ne $True) {
-            Write-Error "Instance is not healthy" -ErrorAction Stop
+Write-Host "Response Status Code: $($response.StatusCode)"
+Write-Host "Response Body Type: $($response.Body.GetType().Name)"
+Write-Host "Response Body: $($response.Body | ConvertTo-Json -Depth 10)"
+
+# Store response in a variable accessible to Pester
+$global:HealthCheckResponse = $response
+
+# Run Pester tests for HealthCheck response validation
+$pesterConfig = New-PesterConfiguration
+$pesterConfig.Run.ScriptBlock = {
+    Describe "HealthCheck API Response Validation" {        It "Should return a successful status code" {
+            $global:HealthCheckResponse.StatusCode | Should -Be 200
         }
-        else {
-            Write-Host "Instance is healthy"
+        
+        It "Should return an enumerable response body or null (for empty results)" {
+            # Allow for null response when no health checks have been performed
+            if ($global:HealthCheckResponse.Body -ne $null) {
+                $global:HealthCheckResponse.Body | Should -BeOfType [System.Collections.IEnumerable]
+            } else {
+                Write-Warning "Response body is null - this may be expected if no health checks have been performed yet"
+                $global:HealthCheckResponse.StatusCode | Should -Be 200
+            }
+        }        
+        
+        It "Should contain health check items and validate healthy status" {
+            if ($global:HealthCheckResponse.Body -eq $null) {
+                throw "Response body is null - health check items are required"
+            } elseif ($global:HealthCheckResponse.Body -is [System.Collections.IEnumerable]) {
+                Write-Host "Response is enumerable, validating health check items..."
+                
+                if ($global:HealthCheckResponse.Body.Count -eq 0) {
+                    throw "No health check items found in response - at least one health check item is required"
+                }
+                
+                foreach ($healthcheckItem in $global:HealthCheckResponse.Body) {
+                    Write-Host "Processing healthcheck item: $($healthcheckItem | ConvertTo-Json -Depth 5)"
+                    
+                    # Validate that each item has required properties
+                    $healthcheckItem | Should -Not -BeNullOrEmpty
+                    $healthcheckItem.document | Should -Not -BeNullOrEmpty
+                    $healthcheckItem.document.healthy | Should -Be $True -Because "Instance must be healthy - any other status is a failure"
+                }
+            } else {
+                throw "HealthCheck response is not an enumerable type"
+            }
         }
     }
-} else {
-    Write-Error "HealthCheck response is not an array." -ErrorAction Stop
 }
+$pesterConfig.Output.Verbosity = 'Detailed'
+
+# Execute the Pester tests
+Invoke-Pester -Configuration $pesterConfig
 
 Write-Host "HealthCheck Data returned. Process completed."

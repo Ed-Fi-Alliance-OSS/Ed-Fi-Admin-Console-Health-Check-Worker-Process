@@ -25,6 +25,40 @@ if ($d) {
     }
 }
 else {
+    # Always build Health Check Service Docker image when starting services
+    Write-Output "Building Ed-Fi Admin Console Health Check Service Docker image..."
+    
+    # Navigate to the project root (3 levels up from docker folder)
+    $originalLocation = Get-Location
+    Set-Location "$PSScriptRoot/../../../"
+    
+    try {
+        $dockerBuildArgs = @(
+            "build",
+            "-f", "Docker/Dockerfile",
+            "-t", "edfi.adminconsole.healthcheckservice"
+        )
+        
+        if ($rebuild) {
+            Write-Output "Force rebuilding (no cache)..."
+            $dockerBuildArgs += "--no-cache"
+        }
+        
+        $dockerBuildArgs += "."
+        
+        $buildResult = & docker @dockerBuildArgs
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Docker build failed with exit code $LASTEXITCODE"
+            return
+        }
+        
+        Write-Output "Health Check Service Docker image built successfully!"
+    }
+    finally {
+        # Always return to original location
+        Set-Location $originalLocation
+    }
+
     $pull = "never"
     if ($p) {
         $pull = "always"
